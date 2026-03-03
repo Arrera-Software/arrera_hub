@@ -37,3 +37,7 @@ pub fn save_index(content: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+// ToDo : Fonction pour les valeur qui son dans le JSON de apps
+
+// ToDo : fonction pour check le refresh du depots (Refrech tout les jour)
