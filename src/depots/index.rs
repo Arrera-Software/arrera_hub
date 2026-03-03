@@ -1,4 +1,3 @@
-use reqwest::blocking::get;
 use crate::config::gest_index::save_index;
 
 pub fn load_depots() -> Result<(), Box<dyn std::error::Error>> {

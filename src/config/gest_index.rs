@@ -1,8 +1,9 @@
 use std::fs;
-use std::path::PathBuf;
 use std::sync::Mutex;
 use crate::config::dect_os;
 use dirs;
+use crate::config::user_conf::add_conf;
+use chrono::Local;
 
 static PATH_INDEX : Mutex<String> = Mutex::new(String::new());
 
@@ -16,34 +17,36 @@ fn read_value() -> String {
     data.clone()
 }
 
-pub fn save_index(content: &str) -> bool {
+pub fn save_index(content: &str) -> Result<(), Box<dyn std::error::Error>> {
     let os: i32 = dect_os();
 
-    let mut dir = match dirs::home_dir() {
-        Some(path) => path,
-        None => return false,
-    };
+    let mut dir = dirs::home_dir().ok_or("Impossible de trouver le dossier personnel")?;
 
-    if os == 1 {
-        // WINDOWS
-        dir.push("AppData");
-        dir.push("Roaming");
-        dir.push("arrera-hub");
-    } else if os == 2 || os == 3 {
-        // LINUX & MAC
-        dir.push(".config");
-        dir.push("arrera-hub");
-    } else {
-        return false;
+    match os {
+        1 => { // Windows
+            dir.push("AppData");
+            dir.push("Roaming");
+            dir.push("arrera-hub");
+        },
+        2 | 3 => { // Linux & Mac
+            dir.push(".config");
+            dir.push("arrera-hub");
+        },
+        _ => return Err("OS non supporté".into()),
     }
 
     dir.push("index.json");
 
     if let Some(parent) = dir.parent() {
-        if fs::create_dir_all(parent).is_err() {
-            return false;
-        }
+        fs::create_dir_all(parent)?;
     }
 
-    fs::write(dir, content).is_ok()
+    let maintenant = Local::now();
+    let date_string = maintenant.format("%d/%m/%Y %H:%M:%S").to_string();
+
+    add_conf("load_index",&date_string)?;
+
+    fs::write(dir, content)?;
+    
+    Ok(())
 }
