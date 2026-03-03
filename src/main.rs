@@ -1,10 +1,18 @@
+use crate::config::gest_index::check_date;
+use crate::depots::index::load_depots;
+
 pub mod depots;
 pub mod config;
 
 fn main() {
     println!("Arrera Hub");
-
-    config::dect_os();
-    let _ = depots::index::load_depots();
-    println!("{}", config::user_conf::read_conf("load_index").unwrap())
+    if check_date(){
+        println!("Depots a jour");
+    }else{
+        println!("Depots pas a jour");
+        match load_depots() {
+            Ok(_) => println!("Debots mise a jour avec succes"),
+            Err(e) => println!("Imposible de mettre a jour le depots : {}", e),
+        }
+    }
 }

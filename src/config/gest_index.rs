@@ -1,7 +1,7 @@
 use std::fs;
 use crate::config::dect_os;
 use dirs;
-use crate::config::user_conf::add_conf;
+use crate::config::user_conf::{add_conf, read_conf};
 use chrono::Local;
 
 pub fn save_index(content: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -29,7 +29,7 @@ pub fn save_index(content: &str) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let maintenant = Local::now();
-    let date_string = maintenant.format("%d/%m/%Y %H:%M:%S").to_string();
+    let date_string = maintenant.format("%d/%m/%Y").to_string();
 
     add_conf("load_index",&date_string)?;
 
@@ -40,4 +40,9 @@ pub fn save_index(content: &str) -> Result<(), Box<dyn std::error::Error>> {
 
 // ToDo : Fonction pour les valeur qui son dans le JSON de apps
 
-// ToDo : fonction pour check le refresh du depots (Refrech tout les jour)
+pub fn check_date() -> bool{
+    match read_conf("load_index"){
+        Some(v) => return v == Local::now().format("%d/%m/%Y").to_string(),
+        None => return false
+    }
+}
