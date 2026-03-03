@@ -1,21 +1,8 @@
 use std::fs;
-use std::sync::Mutex;
 use crate::config::dect_os;
 use dirs;
 use crate::config::user_conf::add_conf;
 use chrono::Local;
-
-static PATH_INDEX : Mutex<String> = Mutex::new(String::new());
-
-fn write_value(val: &str) {
-    let mut data = PATH_INDEX.lock().unwrap();
-    *data = val.to_string();
-}
-
-fn read_value() -> String {
-    let data = PATH_INDEX.lock().unwrap();
-    data.clone()
-}
 
 pub fn save_index(content: &str) -> Result<(), Box<dyn std::error::Error>> {
     let os: i32 = dect_os();
@@ -47,6 +34,6 @@ pub fn save_index(content: &str) -> Result<(), Box<dyn std::error::Error>> {
     add_conf("load_index",&date_string)?;
 
     fs::write(dir, content)?;
-    
+
     Ok(())
 }
