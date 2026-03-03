@@ -5,5 +5,6 @@ fn main() {
     println!("Arrera Hub");
 
     config::dect_os();
-    depots::index::load_depots();
+    let _ = depots::index::load_depots();
+    println!("{}", config::user_conf::read_conf("load_index").unwrap())
 }

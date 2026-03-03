@@ -5,6 +5,6 @@ pub fn load_depots() -> Result<(), Box<dyn std::error::Error>> {
     let content = reqwest::blocking::get(
         "https://raw.githubusercontent.com/Arrera-Software/distribution/refs/heads/main/index.json")
         ?.text()?;
-    save_index(&*content);
+    let _ = save_index(&*content);
     Ok(())
 }

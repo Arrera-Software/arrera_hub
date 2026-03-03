@@ -23,7 +23,7 @@ fn get_path_config () -> String
         return String::new();
     }
 
-    fs::create_dir_all(&dir);
+    let _ = fs::create_dir_all(&dir);
 
     let mut config_path = dir.clone();
     config_path.push("config.ini");
@@ -45,4 +45,16 @@ pub fn add_conf(cles : &str, valeur : &str)-> Result<(), Box<dyn std::error::Err
     conf.write_to_file(path_config_file)?;
 
     Ok(())
+}
+pub fn read_conf(cles: &str) -> Option<String> {
+    let path_config_file: String = get_path_config();
+
+    let conf = Ini::load_from_file(path_config_file).ok()?;
+
+    let value = conf
+        .section(Some("general"))
+        .and_then(|section| section.get(cles))
+        .map(|v| v.to_string());
+
+    value
 }
