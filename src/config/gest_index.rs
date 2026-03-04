@@ -71,7 +71,7 @@ pub fn save_index(content: &str) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 pub fn get_img_application(cathegorie : &str, nom : &str) -> Result<Vec<String>, Box<dyn std::error::Error>>{
-    if cathegorie != "application" && cathegorie != "assistants" {
+    if cathegorie != "application" && cathegorie != "assistant" {
         return Err("Catégorie invalide".into());
     }
 
@@ -81,8 +81,10 @@ pub fn get_img_application(cathegorie : &str, nom : &str) -> Result<Vec<String>,
     // On cherche l'item
     let app = if cathegorie == "application" {
         parsed.application.iter().find(|a| a.name == nom)
-    } else {
+    } else if cathegorie == "assistant" {
         parsed.assistants.iter().find(|a| a.name == nom)
+    }else{
+        return Err("Catégorie invalide".into());
     };
 
     // On gère l'erreur si non trouvé et on CLONE la valeur
