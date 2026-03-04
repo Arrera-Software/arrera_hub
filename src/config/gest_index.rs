@@ -5,7 +5,6 @@ use dirs;
 use crate::config::user_conf::{add_conf, read_conf};
 use chrono::Local;
 use serde::Deserialize;
-use log::error;
 
 #[derive(Deserialize, Debug)]
 struct Item {
@@ -93,9 +92,9 @@ pub fn get_img_application(cathegorie : &str, nom : &str) -> Result<Vec<String>,
     Ok(vec![item.img.clone()])
 }
 
-pub async fn load_json_application(cathegorie : &str, nom : &str)-> Result<Vec<Depot>, Box<dyn std::error::Error>>
+pub async fn load_json_application(cathegorie : &str, nom : &str)-> Result<Depot, Box<dyn std::error::Error>>
 {
-    if cathegorie != "application" && cathegorie != "assistants" {
+    if cathegorie != "application" && cathegorie != "assistant" {
         return Err("Catégorie invalide".into());
     }
 
@@ -118,9 +117,9 @@ pub async fn load_json_application(cathegorie : &str, nom : &str)-> Result<Vec<D
 
     let response = reqwest::get(&app.url).await?;
 
-    let depots: Vec<Depot> = response.json().await?;
+    let depot: Depot = response.json().await?;
 
-    Ok(depots)
+    Ok(depot)
 }
 
 pub fn check_date() -> bool{

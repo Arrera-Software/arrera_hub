@@ -17,11 +17,16 @@ async fn main() {
         }
     }*/
 
-    load_depots();
+    let _ = load_depots().await;
+
+    // OU pour une meilleure gestion des erreurs (recommandé) :
+    if let Err(e) = load_depots().await {
+        println!("Impossible de mettre à jour les dépôts : {}", e);
+    }
 
     println!("Recuperation de depots de SIX et Arrera Interface");
 
-    println!("Six : {:?}", load_json_application("assistants", "six").await);
+    println!("Six : {:?}", load_json_application("assistant", "Six").await.unwrap());
 
-    println!("Interface : {:?}", load_json_application("application","arrera").await);
+    println!("Interface : {:?}", load_json_application("application","arrera").await.unwrap());
 }
