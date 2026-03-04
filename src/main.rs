@@ -1,4 +1,4 @@
-use crate::config::gest_index::{check_date, get_img_application, load_json_application};
+use crate::config::gest_index::{check_date, get_img_application, get_link_download};
 use crate::depots::index::load_depots;
 
 pub mod depots;
@@ -25,7 +25,7 @@ async fn main() {
 
     println!("Recuperation de depots de SIX et Arrera Interface");
 
-    println!("Six : {:?}", load_json_application("assistant", "Six").await.unwrap());
+    println!("Six : {:?}", get_link_download("assistant", "Six").await);
 
-    println!("Interface : {:?}", load_json_application("application","arrera").await.unwrap());
+    println!("Interface : {:?}", get_link_download("application","arrera").await);
 }

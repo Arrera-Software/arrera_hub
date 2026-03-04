@@ -5,6 +5,7 @@ use dirs;
 use crate::config::user_conf::{add_conf, read_conf};
 use chrono::Local;
 use serde::Deserialize;
+use crate::depots::index::load_depots;
 
 #[derive(Deserialize, Debug)]
 struct Item {
@@ -94,7 +95,7 @@ pub fn get_img_application(cathegorie : &str, nom : &str) -> Result<Vec<String>,
     Ok(vec![item.img.clone()])
 }
 
-pub async fn load_json_application(cathegorie : &str, nom : &str)-> Result<Depot, Box<dyn std::error::Error>>
+async fn load_json_application(cathegorie : &str, nom : &str)-> Result<Depot, Box<dyn std::error::Error>>
 {
     if cathegorie != "application" && cathegorie != "assistant" {
         return Err("Catégorie invalide".into());
@@ -122,6 +123,21 @@ pub async fn load_json_application(cathegorie : &str, nom : &str)-> Result<Depot
     let depot: Depot = response.json().await?;
 
     Ok(depot)
+}
+
+pub async fn get_link_download(cathegorie: &str, nom: &str) -> String {
+    let depots = match load_json_application(cathegorie, nom).await {
+        Ok(d) => d,
+        Err(_) => return String::new(),
+    };
+
+    // 2. On récupère le premier dépôt de manière sécurisée
+    return match dect_os() {
+        1 => depots.download_windows.clone(),
+        2 => depots.download_linux.clone(),
+        3 => depots.download_macos.clone(),
+        _ => String::new(), // Cas où l'OS n'est pas reconnu (0 ou autre)
+    };
 }
 
 pub fn check_date() -> bool{
