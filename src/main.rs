@@ -1,4 +1,4 @@
-use crate::config::gest_index::{check_date, get_img_application, get_link_download};
+use crate::config::gest_index::{check_date, get_img_application, get_link_download, get_name_application, get_version_application};
 use crate::depots::index::load_depots;
 
 pub mod depots;
@@ -25,7 +25,13 @@ async fn main() {
 
     println!("Recuperation de depots de SIX et Arrera Interface");
 
-    println!("Six : {:?}", get_link_download("assistant", "Six").await);
-
-    println!("Interface : {:?}", get_link_download("application","arrera").await);
+    println!("Six : \n url {:?} \n Version : {:?} \n Name : {:?}",
+             get_link_download("assistant", "Six").await,
+            get_version_application("assistant", "Six").await,
+            get_name_application("assistant", "Six").await);
+    println!("\n\n");
+    println!("Interface : \n url {:?} \n Version : {:?} \n Name : {:?}",
+             get_link_download("application","arrera").await,
+             get_version_application("application","arrera").await,
+             get_name_application("application","arrera").await);
 }

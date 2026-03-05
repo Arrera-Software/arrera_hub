@@ -5,7 +5,6 @@ use dirs;
 use crate::config::user_conf::{add_conf, read_conf};
 use chrono::Local;
 use serde::Deserialize;
-use crate::depots::index::load_depots;
 
 #[derive(Deserialize, Debug)]
 struct Item {
@@ -136,6 +135,36 @@ pub async fn get_link_download(cathegorie: &str, nom: &str) -> String {
         1 => depots.download_windows.clone(),
         2 => depots.download_linux.clone(),
         3 => depots.download_macos.clone(),
+        _ => String::new(), // Cas où l'OS n'est pas reconnu (0 ou autre)
+    };
+}
+
+pub async fn get_name_application(cathegorie: &str, nom: &str) -> String {
+    let depots = match load_json_application(cathegorie, nom).await {
+        Ok(d) => d,
+        Err(_) => return String::new(),
+    };
+
+    // 2. On récupère le premier dépôt de manière sécurisée
+    return match dect_os() {
+        1 => depots.name.clone(),
+        2 => depots.name.clone(),
+        3 => depots.name.clone(),
+        _ => String::new(), // Cas où l'OS n'est pas reconnu (0 ou autre)
+    };
+}
+
+pub async fn get_version_application(cathegorie: &str, nom: &str) -> String {
+    let depots = match load_json_application(cathegorie, nom).await {
+        Ok(d) => d,
+        Err(_) => return String::new(),
+    };
+
+    // 2. On récupère le premier dépôt de manière sécurisée
+    return match dect_os() {
+        1 => depots.version.clone(),
+        2 => depots.version.clone(),
+        3 => depots.version.clone(),
         _ => String::new(), // Cas où l'OS n'est pas reconnu (0 ou autre)
     };
 }
