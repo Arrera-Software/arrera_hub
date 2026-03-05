@@ -1,12 +1,13 @@
 use std::env;
 use std::fs::{self, File};
 use std::io::{self, Write};
-use crate::config::gest_index::get_link_download;
+use std::os::unix::fs::PermissionsExt;
+use crate::config::gest_index::{get_img_application, get_link_download, get_version_application};
 use futures_util::StreamExt;
 use zip::ZipArchive;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use crate::config::dect_os;
+use crate::config::{dect_os, download_file};
 
 pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std::error::Error>> {
     let zip_path = env::temp_dir().join("application.zip");
@@ -39,7 +40,7 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
     println!(); // Nouvelle ligne après la barre de progression
 
     // UnZip
-    let file = fs::File::open(&zip_path)?;
+    let file = File::open(&zip_path)?;
     let mut archive = ZipArchive::new(file)?;
 
     let target_dir = Path::new(&extract_to);
@@ -59,7 +60,7 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
                     fs::create_dir_all(p)?;
                 }
             }
-            let mut outfile = fs::File::create(&outpath)?;
+            let mut outfile = File::create(&outpath)?;
             io::copy(&mut file, &mut outfile)?;
         }
 
@@ -74,13 +75,13 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
 
     match dect_os() {
         1 => Err("Pas implémenté pour Windows".into()),
-        2 => Err("Pas implémenté pour Linux".into()),
+        2 => install_linux(target_dir.to_str().unwrap(), cathegorie, nom).await,
         3 => install_dmg(target_dir.to_str().unwrap()),
         _ => Err("OS non supporté".into()),
     }
 }
 
-pub fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut dmg_file_path: Option<PathBuf> = None;
 
     for entry in fs::read_dir(outpath)? {
@@ -162,5 +163,106 @@ pub fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
     }
 
 
+    Ok(())
+}
+
+pub async fn install_linux(tager_dir: &str, cathegorie: &str, nom: &str) -> Result<(), Box<dyn std::error::Error>> {
+
+    let mut source_opt = None;
+    for entry in fs::read_dir(tager_dir)? {
+        let path = entry?.path();
+        if path.is_dir() {
+            source_opt = Some(path);
+            break; // On prend le premier dossier trouvé
+        }
+    }
+    let source = source_opt.ok_or("Aucun dossier n'a été trouvé dans le répertoire d'extraction")?;
+
+    let home = dirs::home_dir().ok_or("Impossible de trouver le Home")?;
+    let destination_parent = home.join("Applications");
+
+    if !destination_parent.exists() {
+        fs::create_dir_all(&destination_parent)?;
+    }
+
+    let mut options = fs_extra::dir::CopyOptions::new();
+    options.overwrite = true;
+    options.content_only = false;
+    fs_extra::dir::copy(&source, &destination_parent, &options)?;
+
+    let dossier_app_final = destination_parent.join(source.file_name().unwrap());
+
+    let mut executable_name_opt = None;
+    for entry in fs::read_dir(&dossier_app_final)? {
+        let path = entry?.path();
+        if path.is_file() {
+            let mode = fs::metadata(&path)?.permissions().mode();
+            // Sur Linux, 0o111 vérifie si au moins un bit "x" est présent
+            if mode & 0o111 != 0 {
+                executable_name_opt = Some(path.file_name().unwrap().to_string_lossy().into_owned());
+                break; // On prend le premier exécutable trouvé
+            }
+        }
+    }
+    let executable_name = executable_name_opt.ok_or("Aucun exécutable trouvé dans le dossier")?;
+
+    let chemin_icone = dossier_app_final.join("icon.png");
+    let version = get_version_application(cathegorie, nom).await;
+    let urls_img = get_img_application(cathegorie, nom)?;
+
+    if let Some(url_url) = urls_img.first() {
+        if let Err(e) = download_file(url_url, &chemin_icone).await {
+            eprintln!("Avertissement : Impossible de télécharger l'icône : {}", e);
+        }
+    }
+
+    let chemin_exec = dossier_app_final.join(&executable_name);
+    let chemin_launch_sh = dossier_app_final.join("launch.sh");
+
+    let contenu_sh = format!(
+        "#!/bin/bash\n\
+        cd \"{}\"\n\
+        exec ./\"{}\"\n",
+        dossier_app_final.display(),
+        executable_name
+    );
+    fs::write(&chemin_launch_sh, contenu_sh)?;
+
+    let mut perms_sh = fs::metadata(&chemin_launch_sh)?.permissions();
+    perms_sh.set_mode(0o755);
+    fs::set_permissions(&chemin_launch_sh, perms_sh)?;
+
+    // Rendre le binaire principal exécutable
+    if chemin_exec.exists() {
+        let mut perms_exec = fs::metadata(&chemin_exec)?.permissions();
+        perms_exec.set_mode(0o755);
+        fs::set_permissions(&chemin_exec, perms_exec)?;
+    }
+
+    let dossier_lanceurs = home.join(".local/share/applications");
+    if !dossier_lanceurs.exists() {
+        fs::create_dir_all(&dossier_lanceurs)?;
+    }
+
+    let chemin_desktop = dossier_lanceurs.join(format!("{}.desktop", nom.to_lowercase().replace(" ", "_")));
+
+    let contenu_desktop = format!(
+        "[Desktop Entry]\n\
+        Type=Application\n\
+        Version={version}\n\
+        Name={nom_app}\n\
+        Comment=Lanceur pour {nom_app}\n\
+        Exec=\"{exec_path}\"\n\
+        Icon={icon_path}\n\
+        Terminal=false\n\
+        Categories=Utility;Development;\n\
+        Path={dossier_app}\n",
+        version = version,
+        nom_app = nom,
+        exec_path = chemin_launch_sh.display(),
+        icon_path = chemin_icone.display(),
+        dossier_app = dossier_app_final.display()
+    );
+    fs::write(&chemin_desktop, contenu_desktop)?;
     Ok(())
 }

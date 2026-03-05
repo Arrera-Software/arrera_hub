@@ -40,6 +40,7 @@ version = "0.0.0"
 dependencies = [
  "chrono",
  "dirs",
+ "fs_extra",
  "futures-util",
  "reqwest",
  "rust-ini",
