@@ -17,8 +17,7 @@ async fn main() {
             Err(e) => println!("Imposible de mettre a jour le depots : {}", e),
         }
     }
-
-    // OU pour une meilleure gestion des erreurs (recommandé) :
+    
     if let Err(e) = load_depots().await {
         println!("Impossible de mettre à jour les dépôts : {}", e);
     }
