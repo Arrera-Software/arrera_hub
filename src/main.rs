@@ -17,7 +17,7 @@ async fn main() {
             Err(e) => println!("Imposible de mettre a jour le depots : {}", e),
         }
     }
-    
+
     if let Err(e) = load_depots().await {
         println!("Impossible de mettre à jour les dépôts : {}", e);
     }
@@ -38,5 +38,5 @@ async fn main() {
     println!("\n\n");
     println!("Tentavite de download du zip d'Arrera");
 
-    install_app("application", "arrera").await.expect("TODO: panic message");
+    install_app("assistant", "Six").await.expect("TODO: panic message");
 }

@@ -41,7 +41,6 @@ dependencies = [
  "chrono",
  "dirs",
  "futures-util",
- "log",
  "reqwest",
  "rust-ini",
  "serde",
