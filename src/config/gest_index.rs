@@ -28,7 +28,7 @@ pub struct Depot {
 }
 
 
-pub fn get_path_index() -> Result<PathBuf, Box<dyn std::error::Error>> {
+fn get_path_index() -> Result<PathBuf, Box<dyn std::error::Error>> {
 
     let os: i32 = dect_os();
 
