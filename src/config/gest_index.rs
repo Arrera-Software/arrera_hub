@@ -159,13 +159,11 @@ pub async fn get_version_application(cathegorie: &str, nom: &str) -> String {
         Ok(d) => d,
         Err(_) => return String::new(),
     };
-
-    // 2. On récupère le premier dépôt de manière sécurisée
     return match dect_os() {
         1 => depots.version.clone(),
         2 => depots.version.clone(),
         3 => depots.version.clone(),
-        _ => String::new(), // Cas où l'OS n'est pas reconnu (0 ou autre)
+        _ => String::new(), 
     };
 }
 

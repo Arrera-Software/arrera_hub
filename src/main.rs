@@ -1,4 +1,5 @@
 use crate::config::gest_index::{check_date, get_img_application, get_link_download, get_name_application, get_version_application};
+use crate::depots::application::install_app;
 use crate::depots::index::load_depots;
 
 pub mod depots;
@@ -34,4 +35,9 @@ async fn main() {
              get_link_download("application","arrera").await,
              get_version_application("application","arrera").await,
              get_name_application("application","arrera").await);
+
+    println!("\n\n");
+    println!("Tentavite de download du zip d'Arrera");
+
+    install_app("application", "arrera").await.expect("TODO: panic message");
 }
