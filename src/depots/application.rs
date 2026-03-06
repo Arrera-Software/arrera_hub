@@ -1,15 +1,21 @@
 use std::env;
 use std::fs::{self, File};
 use std::io::{self, Write};
-use std::os::unix::fs::PermissionsExt;
 use crate::config::gest_index::{get_img_application, get_link_download, get_version_application};
 use futures_util::StreamExt;
 use zip::ZipArchive;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use crate::config::{dect_os, download_file};
+use crate::config::{download_file};
+
+#[cfg(windows)]
 use mslnk::ShellLink;
+#[cfg(windows)]
 use fs_extra::dir::{CopyOptions};
+
+
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
 
 pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std::error::Error>> {
     let zip_path = env::temp_dir().join("application.zip");
@@ -75,14 +81,19 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
         }
     }
 
-    match dect_os() {
-        1 => Err("Pas implémenté pour Windows".into()),
-        2 => install_linux(target_dir.to_str().unwrap(), cathegorie, nom).await,
-        3 => install_dmg(target_dir.to_str().unwrap()),
-        _ => Err("OS non supporté".into()),
-    }
-}
 
+    #[cfg(target_os = "windows")]
+    return install_win(target_dir.to_str().unwrap())?;
+
+    #[cfg(target_os = "linux")]
+    return install_linux(target_dir.to_str().unwrap(), cathegorie, nom).await?;
+
+    #[cfg(target_os = "macos")]
+    install_dmg(target_dir.to_str().unwrap())?;
+
+    Ok(())
+}
+#[cfg(unix)]
 fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut dmg_file_path: Option<PathBuf> = None;
 
@@ -167,7 +178,7 @@ fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-
+#[cfg(unix)]
 pub async fn install_linux(tager_dir: &str, cathegorie: &str, nom: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     let mut source_opt = None;
@@ -268,7 +279,7 @@ pub async fn install_linux(tager_dir: &str, cathegorie: &str, nom: &str) -> Resu
     fs::write(&chemin_desktop, contenu_desktop)?;
     Ok(())
 }
-
+#[cfg(windows)]
 fn install_win(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
     // 1. Définir le chemin du dossier "Application" dans le répertoire temporaire (outpath)
     let app_temp_dir = Path::new(outpath).join("Application");
