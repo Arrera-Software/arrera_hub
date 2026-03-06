@@ -1,7 +1,7 @@
 use std::env;
 use std::fs::{self, File};
 use std::io::{self, Write};
-use crate::config::gest_index::{get_img_application, get_link_download, get_version_application};
+use crate::config::gest_index::{get_img_application, get_link_download, get_version_application, get_name_application};
 use futures_util::StreamExt;
 use zip::ZipArchive;
 use std::path::{Path, PathBuf};
@@ -83,7 +83,7 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
 
 
     #[cfg(target_os = "windows")]
-    return Ok(install_win(target_dir.to_str().unwrap())?);
+    return Ok(install_win(target_dir.to_str().unwrap(), cathegorie, nom).await?);
 
 
     #[cfg(target_os = "linux")]
@@ -281,7 +281,7 @@ pub async fn install_linux(tager_dir: &str, cathegorie: &str, nom: &str) -> Resu
     Ok(())
 }
 #[cfg(windows)]
-fn install_win(outpath: &str) -> Result<(), Box<dyn std::error::Error>>
+async fn install_win(outpath: &str, cathegorie: &str, nom: &str) -> Result<(), Box<dyn std::error::Error>>
 {
     let outpath = Path::new(outpath);
     let mut source_folder_opt = None;
@@ -330,7 +330,7 @@ fn install_win(outpath: &str) -> Result<(), Box<dyn std::error::Error>>
 
     let exe_path = exe_path.ok_or("Aucun exécutable (.exe) trouvé dans le dossier installé")?;
     let exe_path_str = exe_path.to_str().ok_or("Chemin de l'exécutable invalide")?;
-
+    
     // Création du raccourci
     println!("Création du raccourci dans le menu Démarrer...");
     let appdata = env::var("APPDATA")?;
@@ -341,7 +341,8 @@ fn install_win(outpath: &str) -> Result<(), Box<dyn std::error::Error>>
         fs::create_dir_all(&start_menu_path)?;
     }
 
-    let shortcut_path = start_menu_path.join(format!("{}.lnk", folder_name));
+    let app_name = get_name_application(cathegorie, nom).await;
+    let shortcut_path = start_menu_path.join(format!("{}.lnk", app_name));
 
     let mut link = ShellLink::new(exe_path_str)?;
     link.set_working_dir(Some(final_app_dir.to_str().unwrap().to_string()));
