@@ -87,7 +87,7 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
 
 
     #[cfg(target_os = "linux")]
-    return install_linux(target_dir.to_str().unwrap(), cathegorie, nom).await?;
+    return Ok(install_linux(target_dir.to_str().unwrap(), cathegorie, nom).await?);
 
     #[cfg(target_os = "macos")]
     install_dmg(target_dir.to_str().unwrap())?;
