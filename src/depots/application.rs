@@ -1,18 +1,23 @@
 use std::env;
 use std::fs::{self, File};
 use std::io::{self, Write};
-use crate::config::gest_index::{get_img_application, get_link_download, get_version_application, get_name_application};
+use crate::config::gest_index::{get_img_application, get_link_download, get_version_application};
 use futures_util::StreamExt;
 use zip::ZipArchive;
-use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::path::Path;
 use crate::config::{download_file};
 
 #[cfg(windows)]
-use mslnk::ShellLink;
-#[cfg(windows)]
-use fs_extra::dir::{CopyOptions};
+use {
+    mslnk::ShellLink,
+    fs_extra::dir::{CopyOptions},
+    crate::config::gest_index::get_name_application
+};
 
+#[cfg(target_os = "macos")]
+use {std::process::Command,
+     std::path::{Path, PathBuf}
+};
 
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
@@ -90,11 +95,9 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
     return Ok(install_linux(target_dir.to_str().unwrap(), cathegorie, nom).await?);
 
     #[cfg(target_os = "macos")]
-    install_dmg(target_dir.to_str().unwrap())?;
-
-    Ok(())
+    return Ok(install_dmg(target_dir.to_str().unwrap())?);
 }
-#[cfg(unix)]
+#[cfg(target_os = "macos")]
 fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut dmg_file_path: Option<PathBuf> = None;
 
@@ -175,8 +178,6 @@ fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
     if !ditto_status.success() {
         return Err("L'installation a échoué pendant la copie.".into());
     }
-
-
     Ok(())
 }
 #[cfg(unix)]
