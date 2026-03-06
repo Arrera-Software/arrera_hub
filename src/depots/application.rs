@@ -8,6 +8,8 @@ use zip::ZipArchive;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use crate::config::{dect_os, download_file};
+use mslnk::ShellLink;
+use fs_extra::dir::{CopyOptions};
 
 pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std::error::Error>> {
     let zip_path = env::temp_dir().join("application.zip");
@@ -264,5 +266,78 @@ pub async fn install_linux(tager_dir: &str, cathegorie: &str, nom: &str) -> Resu
         dossier_app = dossier_app_final.display()
     );
     fs::write(&chemin_desktop, contenu_desktop)?;
+    Ok(())
+}
+
+fn install_win(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
+    // 1. Définir le chemin du dossier "Application" dans le répertoire temporaire (outpath)
+    let app_temp_dir = Path::new(outpath).join("Application");
+    let mut extracted_folder_path: Option<PathBuf> = None;
+
+    // 2. Trouver le dossier qui a été extrait à l'intérieur
+    for entry in fs::read_dir(&app_temp_dir)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        if path.is_dir() {
+            extracted_folder_path = Some(path);
+            break;
+        }
+    }
+
+    let source_folder = extracted_folder_path.ok_or("Aïe, aucun dossier trouvé dans le répertoire temporaire Application.")?;
+    let folder_name = source_folder.file_name().unwrap().to_string_lossy().into_owned();
+    println!("Super, le dossier extrait est ici : {:?}", source_folder);
+
+    // 3. Préparer le dossier de destination C:/Applications
+    let target_base_dir = Path::new("C:\\Applications");
+    if !target_base_dir.exists() {
+        fs::create_dir_all(target_base_dir)?;
+    }
+
+    // 4. Copier le dossier avec fs_extra (équivalent du 'ditto' sur mac)
+    println!("Copie du dossier vers C:\\Applications...");
+    let mut options = CopyOptions::new();
+    options.overwrite = true;
+
+    // On copie source_folder dans target_base_dir
+    fs_extra::dir::copy(&source_folder, target_base_dir, &options)?;
+
+    let final_app_dir = target_base_dir.join(&folder_name);
+    println!("Dossier copié avec succès dans : {:?}", final_app_dir);
+
+    // 5. Chercher l'exécutable (.exe) dans le dossier final pour le raccourci
+    let mut exe_path: Option<PathBuf> = None;
+    for entry in fs::read_dir(&final_app_dir)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        if path.extension().and_then(|ext| ext.to_str()) == Some("exe") {
+            exe_path = Some(path);
+            break;
+        }
+    }
+
+    let exe_path = exe_path.ok_or("Aucun exécutable (.exe) trouvé dans le dossier copié")?;
+    let exe_path_str = exe_path.to_str().ok_or("Chemin de l'exécutable invalide")?;
+    println!("Exécutable trouvé pour le raccourci : {}", exe_path_str);
+
+    // 6. Créer le raccourci dans le Menu Démarrer de Windows
+    println!("Création du raccourci dans le menu Démarrer...");
+    let appdata = env::var("APPDATA")?;
+    let start_menu_path = PathBuf::from(appdata)
+        .join("Microsoft\\Windows\\Start Menu\\Programs");
+
+    let shortcut_path = start_menu_path.join(format!("{}.lnk", folder_name));
+
+    let mut link = ShellLink::new(exe_path_str)?;
+    link.set_working_dir(Some(final_app_dir.to_str().unwrap().to_string()));
+    link.create_lnk(&shortcut_path)?;
+
+    println!("Installation Windows terminée ! Raccourci créé : {:?}", shortcut_path);
+
+    // Optionnel : Nettoyage du dossier temporaire (comme le detach du DMG)
+    let _ = fs::remove_dir_all(&app_temp_dir);
+
     Ok(())
 }
