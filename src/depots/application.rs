@@ -83,7 +83,8 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
 
 
     #[cfg(target_os = "windows")]
-    return install_win(target_dir.to_str().unwrap())?;
+    return Ok(install_win(target_dir.to_str().unwrap())?);
+
 
     #[cfg(target_os = "linux")]
     return install_linux(target_dir.to_str().unwrap(), cathegorie, nom).await?;
