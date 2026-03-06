@@ -1,11 +1,17 @@
 use std::env;
 use std::fs::{self, File};
 use std::io::{self, Write};
-use crate::config::gest_index::{get_img_application, get_link_download, get_version_application};
+use crate::config::gest_index::get_link_download;
 use futures_util::StreamExt;
 use zip::ZipArchive;
 use std::path::Path;
-use crate::config::{download_file};
+
+
+#[cfg(target_os = "linux")]
+use {
+    crate::config::{download_file},
+    crate::config::gest_index::{get_img_application,get_version_application}
+};
 
 #[cfg(windows)]
 use {
@@ -16,7 +22,7 @@ use {
 
 #[cfg(target_os = "macos")]
 use {std::process::Command,
-     std::path::{Path, PathBuf}
+     std::path::PathBuf
 };
 
 #[cfg(unix)]
@@ -94,8 +100,11 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
     #[cfg(target_os = "linux")]
     return Ok(install_linux(target_dir.to_str().unwrap(), cathegorie, nom).await?);
 
-    #[cfg(target_os = "macos")]
-    return Ok(install_dmg(target_dir.to_str().unwrap())?);
+    #[cfg(target_os = "macos")]{
+        install_dmg(target_dir.to_str().unwrap())?;
+        Ok(())
+    }
+
 }
 #[cfg(target_os = "macos")]
 fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -122,9 +131,7 @@ fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     let dmg_path = dmg_file_path.ok_or("Aïe, aucun fichier .dmg trouvé dans l'archive.")?;
     let dmg_path_str = dmg_path.to_str().ok_or("Chemin du DMG invalide (caractères non UTF-8)")?;
-    println!("Super, le DMG est ici : {}", dmg_path_str);
 
-    println!("Montage du disque...");
     let output = Command::new("hdiutil")
         .args(["attach", dmg_path_str, "-nobrowse", "-plist"])
         .output()?;
@@ -143,8 +150,6 @@ fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
             Some(line[start..end].trim().to_string())
         })
         .ok_or("Impossible de trouver le point de montage (/Volumes/...) dans le XML")?;
-
-    println!("Volume monté sur : {}", volume_path);
 
     let mut app_path: Option<PathBuf> = None;
     for entry in fs::read_dir(&volume_path)? {
@@ -180,7 +185,7 @@ fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
     }
     Ok(())
 }
-#[cfg(unix)]
+#[cfg(target_os = "linux")]
 pub async fn install_linux(tager_dir: &str, cathegorie: &str, nom: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     let mut source_opt = None;
@@ -299,7 +304,6 @@ async fn install_win(outpath: &str, cathegorie: &str, nom: &str) -> Result<(), B
 
     let source_folder = source_folder_opt.ok_or("Aucun dossier trouvé dans le répertoire temporaire.")?;
     let folder_name = source_folder.file_name().unwrap().to_string_lossy().into_owned();
-    println!("Dossier à installer : {:?}", source_folder);
 
     // Destination : User/Applications
     let home_dir = dirs::home_dir().ok_or("Impossible de trouver le dossier utilisateur")?;
@@ -309,14 +313,12 @@ async fn install_win(outpath: &str, cathegorie: &str, nom: &str) -> Result<(), B
         fs::create_dir_all(&target_base_dir)?;
     }
 
-    println!("Copie vers {:?}...", target_base_dir);
     let mut options = CopyOptions::new();
     options.overwrite = true;
 
     fs_extra::dir::copy(&source_folder, &target_base_dir, &options)?;
 
     let final_app_dir = target_base_dir.join(&folder_name);
-    println!("Installation réussie dans : {:?}", final_app_dir);
 
     // Recherche de l'exécutable pour le raccourci
     let mut exe_path: Option<PathBuf> = None;
@@ -348,8 +350,6 @@ async fn install_win(outpath: &str, cathegorie: &str, nom: &str) -> Result<(), B
     let mut link = ShellLink::new(exe_path_str)?;
     link.set_working_dir(Some(final_app_dir.to_str().unwrap().to_string()));
     link.create_lnk(&shortcut_path)?;
-
-    println!("Raccourci créé : {:?}", shortcut_path);
 
     Ok(())
 }
