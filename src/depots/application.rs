@@ -40,25 +40,13 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
         return Err(format!("Erreur HTTP : {}", response.status()).into());
     }
 
-    let total_size = response.content_length().unwrap_or(0);
-    let mut downloaded: u64 = 0;
     let mut stream = response.bytes_stream();
     let mut file = File::create(&zip_path)?;
 
     while let Some(item) = stream.next().await {
         let chunk = item?;
         file.write_all(&chunk)?;
-        downloaded += chunk.len() as u64;
-
-        if total_size > 0 {
-            let percent = (downloaded as f64 / total_size as f64) * 100.0;
-            print!("\rProgression : {:.2}%", percent);
-            io::stdout().flush()?;
-        }
     }
-    println!(); // Nouvelle ligne après la barre de progression
-
-    // UnZip
     let file = File::open(&zip_path)?;
     let mut archive = ZipArchive::new(file)?;
 
