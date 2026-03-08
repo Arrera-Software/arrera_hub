@@ -1,7 +1,7 @@
 use std::env;
 use std::fs::{self, File};
 use std::io::{self, Write};
-use crate::config::gest_index::get_link_download;
+use crate::config::gest_index::{get_link_download, get_name_application, get_version_application};
 use futures_util::StreamExt;
 use zip::ZipArchive;
 use std::path::Path;
@@ -10,14 +10,13 @@ use std::path::Path;
 #[cfg(target_os = "linux")]
 use {
     crate::config::{download_file},
-    crate::config::gest_index::{get_img_application,get_version_application}
+    crate::config::gest_index::{get_img_application}
 };
 
 #[cfg(windows)]
 use {
     mslnk::ShellLink,
     fs_extra::dir::{CopyOptions},
-    crate::config::gest_index::get_name_application
 };
 
 #[cfg(target_os = "macos")]
@@ -27,6 +26,7 @@ use {std::process::Command,
 
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
+use crate::config::user_conf::add_conf;
 
 pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std::error::Error>> {
     let zip_path = env::temp_dir().join("application.zip");
@@ -82,17 +82,27 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
 
 
     #[cfg(target_os = "windows")]
-    return Ok(install_win(target_dir.to_str().unwrap(), cathegorie, nom).await?);
-
+    let result = install_win(target_dir.to_str().unwrap(), cathegorie, nom).await;
 
     #[cfg(target_os = "linux")]
-    return Ok(install_linux(target_dir.to_str().unwrap(), cathegorie, nom).await?);
+    let result = install_linux(target_dir.to_str().unwrap(), cathegorie, nom).await;
 
-    #[cfg(target_os = "macos")]{
-        install_dmg(target_dir.to_str().unwrap())?;
-        Ok(())
+    #[cfg(target_os = "macos")]
+    let result = install_dmg(target_dir.to_str().unwrap());
+
+    if zip_path.exists() {
+        let _ = fs::remove_file(&zip_path);
+    }
+    if extract_to.exists() {
+        let _ = fs::remove_dir_all(&extract_to);
     }
 
+    let name_app = get_name_application(cathegorie,nom).await;
+    let version_app = get_version_application(cathegorie,nom).await;
+
+    add_conf(&name_app, &version_app)?;
+
+    result
 }
 #[cfg(target_os = "macos")]
 fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
