@@ -1,7 +1,4 @@
 use std::path::{PathBuf};
-
-pub mod gest_index;
-
 pub mod user_conf;
 
 pub fn dect_os() -> i32 {

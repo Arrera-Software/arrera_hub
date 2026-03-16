@@ -1,4 +1,4 @@
-use crate::config::gest_index::save_index;
+use crate::depots::gest_depots::save_index;
 
 pub async  fn load_depots() -> Result<(), Box<dyn std::error::Error>> {
     // Dois recuprer le contenu de l'index et le stoker dans un fichier json dans .config (Pour mac os et linux)

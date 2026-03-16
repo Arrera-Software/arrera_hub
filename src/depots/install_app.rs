@@ -1,7 +1,7 @@
 use std::env;
 use std::fs::{self, File};
 use std::io::{self, Write};
-use crate::config::gest_index::{get_link_download, get_name_application, get_version_application};
+use crate::depots::gest_depots::{get_link_download, get_name_application, get_version_application};
 use futures_util::StreamExt;
 use zip::ZipArchive;
 use std::path::Path;

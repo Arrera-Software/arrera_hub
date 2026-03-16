@@ -163,7 +163,7 @@ pub async fn get_version_application(cathegorie: &str, nom: &str) -> String {
         1 => depots.version.clone(),
         2 => depots.version.clone(),
         3 => depots.version.clone(),
-        _ => String::new(), 
+        _ => String::new(),
     };
 }
 

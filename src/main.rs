@@ -1,5 +1,5 @@
-use crate::config::gest_index::{check_date, get_img_application, get_link_download, get_name_application, get_version_application};
-use crate::depots::application::install_app;
+use crate::depots::gest_depots::{check_date, get_img_application, get_link_download, get_name_application, get_version_application};
+use crate::depots::install_app::install_app;
 use crate::depots::index::load_depots;
 
 pub mod depots;
