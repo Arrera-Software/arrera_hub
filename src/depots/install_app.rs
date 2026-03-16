@@ -10,7 +10,7 @@ use std::path::Path;
 #[cfg(target_os = "linux")]
 use {
     crate::config::{download_file},
-    crate::config::gest_index::{get_img_application}
+    crate::depots::gest_depots::{get_img_application}
 };
 
 #[cfg(windows)]
