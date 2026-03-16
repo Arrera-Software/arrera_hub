@@ -22,8 +22,15 @@ fn get_path_config () -> String
     else {
         return String::new();
     }
-
-    let _ = fs::create_dir_all(&dir);
+    
+    if !dir.exists() {
+        if let Err(e) = fs::create_dir_all(&dir) {
+            eprintln!("Impossible de créer le dossier de configuration {}: {}", dir.display(), e);
+            return String::new();
+        }
+    }else{
+        println!("Fichier de confif cree");
+    }
 
     let mut config_path = dir.clone();
     config_path.push("config.ini");
