@@ -14,11 +14,8 @@ pub fn dect_os() -> i32 {
 }
 
 pub async fn download_file(url: &str, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    // Utilise reqwest::get (asynchrone) et non reqwest::blocking::get
     let response = reqwest::get(url).await?;
 
-    // Le reste dépend de comment tu écris ton fichier,
-    // par exemple avec tokio::fs::write ou en récupérant les bytes :
     let bytes = response.bytes().await?;
     std::fs::write(path, bytes)?;
 
