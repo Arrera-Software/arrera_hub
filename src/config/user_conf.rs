@@ -1,6 +1,22 @@
 use std::fs;
+use std::path::Path;
 use ini::Ini;
 use crate::config::dect_os;
+
+pub fn check_config_existing(){
+    let path_config_file = get_path_config();
+    let path = Path::new(&path_config_file);
+
+    if !path.exists() {
+        if let Some(parent) = path.parent() {
+            if !parent.exists() {
+                fs::create_dir_all(parent).unwrap();
+                
+            }
+        }
+        fs::File::create(path).unwrap();
+    }
+}
 fn get_path_config () -> String
 {
     let os = dect_os();
@@ -21,15 +37,6 @@ fn get_path_config () -> String
     }
     else {
         return String::new();
-    }
-    
-    if !dir.exists() {
-        if let Err(e) = fs::create_dir_all(&dir) {
-            eprintln!("Impossible de créer le dossier de configuration {}: {}", dir.display(), e);
-            return String::new();
-        }
-    }else{
-        println!("Fichier de confif cree");
     }
 
     let mut config_path = dir.clone();
