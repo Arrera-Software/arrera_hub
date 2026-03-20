@@ -3,19 +3,19 @@ use std::path::Path;
 use ini::Ini;
 use crate::config::dect_os;
 
-pub fn check_config_existing(){
+pub fn check_config_existing() -> Result<bool, std::io::Error> {
     let path_config_file = get_path_config();
     let path = Path::new(&path_config_file);
 
-    if !path.exists() {
-        if let Some(parent) = path.parent() {
-            if !parent.exists() {
-                fs::create_dir_all(parent).unwrap();
-                
-            }
-        }
-        fs::File::create(path).unwrap();
+    if path.exists() {
+        return Ok(true); 
     }
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?; 
+    }
+    fs::File::create(path)?;
+
+    Ok(false) 
 }
 fn get_path_config () -> String
 {
