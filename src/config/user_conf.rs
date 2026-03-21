@@ -51,12 +51,13 @@ pub fn add_conf(cles : &str, valeur : &str)-> Result<(), Box<dyn std::error::Err
 
     let path_config_file = get_path_config();
 
-    let mut conf = Ini::new();
+    let mut conf = Ini::load_from_file(&path_config_file).
+        unwrap_or_else(|_| Ini::new());
 
     conf.with_section(Some("general"))
         .set(cles, valeur);
 
-    conf.write_to_file(path_config_file)?;
+    conf.write_to_file(&path_config_file)?;
 
     Ok(())
 }
