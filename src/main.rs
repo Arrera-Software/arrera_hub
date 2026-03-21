@@ -24,11 +24,27 @@ async fn main() {
             for software in list_soft {
                 println!("- {}", software.name);
             }
+        }else if args[1] == "install"{
+            if args.len() > 2 {
+                let soft = args[2].clone();
+                println!("Install {} .. ",soft);
+                match hub.install_soft(&soft).await {
+                    Ok(_) => println!("{} installed successfully", soft),
+                    Err(e) => println!("Installation de {} a échouée: {:?}", soft, e),
+                }
+            }else{
+                println!("install (name software)");
+            }
         }
 
     } else {
-        println!("Arrera Hub\n- help \n- about\n - available\n - update")
+        println!("Arrera Hub\n- help \n- about\n- available\n- update")
     }
 
-
+    /*
+    else if args[1] == "update" {
+            println!("Mise a jour des logiciel Arrera");
+            hub.update().await.expect("Update depots failed");
+        }
+    */
 }

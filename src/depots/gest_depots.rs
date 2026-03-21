@@ -86,7 +86,7 @@ pub fn get_img_application(cathegorie : &str, nom : &str) -> Result<String, Box<
 
     let item = list_to_search
         .iter()
-        .find(|a| a.name == nom)
+        .find(|a| a.name.to_lowercase() == nom.to_lowercase())
         .ok_or("Application ou assistant non trouvé")?;
 
     Ok(item.img.clone())
@@ -104,12 +104,12 @@ async fn load_json_application(cathegorie : &str, nom : &str)-> Result<Depot, Bo
     let app: &Item = if cathegorie == "application" {
         parsed.application
             .iter()
-            .find(|a| a.name == nom)
+            .find(|a| a.name.to_lowercase() == nom.to_lowercase())
             .ok_or("Application non trouvée")? // Retourne l'erreur si absent
     } else if cathegorie == "assistant" {
         parsed.assistants
             .iter()
-            .find(|a| a.name == nom)
+            .find(|a| a.name.to_lowercase() == nom.to_lowercase())
             .ok_or("Assistant non trouvé")?
     } else {
         return Err("Catégorie invalide".into());
