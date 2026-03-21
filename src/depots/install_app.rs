@@ -97,11 +97,9 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
         let _ = fs::remove_dir_all(&extract_to);
     }
 
-    let name_app = get_name_application(cathegorie,nom).await;
     let version_app = get_version_application(cathegorie,nom).await;
 
-    add_conf(&name_app, &version_app)?;
-
+    add_conf(&nom.to_lowercase(), &version_app)?;
     result
 }
 #[cfg(target_os = "macos")]

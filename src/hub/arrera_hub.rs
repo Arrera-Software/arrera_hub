@@ -1,5 +1,5 @@
 use std::error::Error;
-use crate::config::user_conf::{add_conf, check_config_existing};
+use crate::config::user_conf::{add_conf, check_config_existing, read_conf};
 use crate::depots::gest_depots::{get_all_software, Item};
 use crate::depots::index::load_depots;
 use crate::depots::install_app::install_app;
@@ -14,7 +14,7 @@ impl ArreraHub {
             load_depots().await?;
             let list_soft = get_all_software()?;
             for software in list_soft {
-                add_conf(software.name.as_str(), "NONE")?;
+                add_conf(&*software.name.as_str().to_lowercase(), "NONE")?;
             }
         }
 
@@ -33,8 +33,19 @@ impl ArreraHub {
         return get_all_software();
     }
 
-    pub fn get_soft_installed(&self){
+    pub fn get_soft_installed(&self) -> Result<Vec<Item>, Box<dyn Error>> {
+        let all_soft = get_all_software()?;
+        let mut installed_soft = Vec::new();
 
+        for soft in all_soft {
+            if let Some(version) = read_conf(&soft.name.to_lowercase()) {
+                if version != "NONE" {
+                    installed_soft.push(soft);
+                }
+            }
+        }
+
+        Ok(installed_soft)
     }
 
     pub async fn install_soft(&self, name: &str) -> Result<(), Box<dyn std::error::Error>> {
