@@ -228,8 +228,8 @@ pub async fn install_linux(tager_dir: &str, cathegorie: &str, nom: &str) -> Resu
     let version = get_version_application(cathegorie, nom).await;
     let urls_img = get_img_application(cathegorie, nom)?;
 
-    if let Some(url_url) = urls_img.first() {
-        if let Err(e) = download_file(url_url, &chemin_icone).await {
+    if !urls_img.is_empty() {
+        if let Err(e) = download_file(&urls_img, &chemin_icone).await {
             eprintln!("Avertissement : Impossible de télécharger l'icône : {}", e);
         }
     }
