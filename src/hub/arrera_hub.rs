@@ -3,6 +3,7 @@ use crate::config::user_conf::{add_conf, check_config_existing, read_conf};
 use crate::depots::gest_depots::{get_all_software, Item};
 use crate::depots::index::load_depots;
 use crate::depots::install_app::install_app;
+use crate::depots::uninstall_app::uninstall_app;
 
 pub struct ArreraHub {
 }
@@ -88,6 +89,34 @@ impl ArreraHub {
             Ok(())
         } else {
             Err("".into())
+        }
+    }
+
+    pub async fn uninstall_soft(&self, name: &str) -> Result<(), Box<dyn std::error::Error>> {
+        // Vérification de l'installation de l'application via la configuration
+        if let Some(version) = read_conf(&name.to_lowercase()) {
+            if version == "NONE" {
+                return Err("L'application n'est pas installée.".into());
+            }
+        } else {
+            return Err("L'application est introuvable dans la configuration.".into());
+        }
+
+        let mut target_category = None;
+               
+        if crate::depots::gest_depots::get_img_application("application", name).is_ok() {
+            target_category = Some("application");
+        }
+
+        else if crate::depots::gest_depots::get_img_application("assistant", name).is_ok() {
+            target_category = Some("assistant");
+        }
+
+        if let Some(category) = target_category {
+            uninstall_app(category, name).await?;
+            Ok(())
+        } else {
+            Err("Impossible de trouver la catégorie de l'application.".into())
         }
     }
 }

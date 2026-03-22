@@ -30,7 +30,7 @@ async fn main() {
                 println!("Install {} .. ",soft);
                 match hub.install_soft(&soft).await {
                     Ok(_) => println!("{} installed successfully", soft),
-                    Err(e) => println!("Installation de {} ", soft),
+                    Err(e) => println!("Erreur lors de l'installation de {} : {}", soft, e),
                 }
             }else{
                 println!("install (name software)");
@@ -47,8 +47,18 @@ async fn main() {
             for software in list_soft {
                 println!("- {}", software.name);
             }
+        }else if args[1] == "uninstall" {
+            if args.len() > 2 {
+                let soft = args[2].clone();
+                println!("Désinstallation de {} .. ", soft);
+                match hub.uninstall_soft(&soft).await {
+                    Ok(_) => println!("{} a été désinstallé avec succès", soft),
+                    Err(e) => println!("Erreur lors de la désinstallation de {} : {}", soft, e),
+                }
+            } else {
+                println!("uninstall (name software)");
+            }
         }
-
     } else {
         println!("Arrera Hub\n- help \n- about\n- available\n- update")
 
