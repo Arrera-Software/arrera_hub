@@ -13,7 +13,7 @@ async fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() > 1 {
         if args[1] == "help" {
-            println!("Arrera Hub\n- help \n- about\n- available\n- update")
+            println!("Arrera Hub\n- help \n- about\n- available\n- update\n- check-update")
         } else if args[1] == "about" {
             println!("Arrera Hub by Arrera Software");
             println!("Version I2026-0.00");
@@ -41,17 +41,16 @@ async fn main() {
             for software in list_soft {
                 println!("- {}", software.name);
             }
+        }else if args[1] == "check-update" {
+            let list_soft = hub.update_check().await.unwrap();
+            println!("Lagiciel a mettre a jour :");
+            for software in list_soft {
+                println!("- {}", software.name);
+            }
         }
 
     } else {
         println!("Arrera Hub\n- help \n- about\n- available\n- update")
 
     }
-
-    /*
-    else if args[1] == "update" {
-            println!("Mise a jour des logiciel Arrera");
-            hub.update().await.expect("Update depots failed");
-        }
-    */
 }
