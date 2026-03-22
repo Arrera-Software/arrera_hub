@@ -210,17 +210,36 @@ pub async fn install_linux(tager_dir: &str, cathegorie: &str, nom: &str) -> Resu
     let dossier_app_final = destination_parent.join(source.file_name().unwrap());
 
     let mut executable_name_opt = None;
+    let mut fallback_name_opt = None;
+
     for entry in fs::read_dir(&dossier_app_final)? {
         let path = entry?.path();
         if path.is_file() {
+            let file_name = path.file_name().unwrap().to_string_lossy().into_owned();
             let mode = fs::metadata(&path)?.permissions().mode();
+            
             // Sur Linux, 0o111 vérifie si au moins un bit "x" est présent
             if mode & 0o111 != 0 {
-                executable_name_opt = Some(path.file_name().unwrap().to_string_lossy().into_owned());
+                executable_name_opt = Some(file_name);
                 break; // On prend le premier exécutable trouvé
+            }
+            
+            // Fallback si l'archive vient de Windows et a perdu ses droits d'exécution
+            if !file_name.ends_with(".png") && !file_name.ends_with(".txt") && !file_name.ends_with(".json") && file_name != "launch.sh" {
+                if file_name.to_lowercase() == nom.to_lowercase() {
+                    fallback_name_opt = Some(file_name.clone());
+                } else if fallback_name_opt.is_none() && !file_name.contains('.') {
+                    fallback_name_opt = Some(file_name);
+                }
             }
         }
     }
+    
+    // Si aucun exécutable n'a été trouvé avec les droits Linux, on utilise le fallback
+    if executable_name_opt.is_none() {
+        executable_name_opt = fallback_name_opt;
+    }
+
     let executable_name = executable_name_opt.ok_or("Aucun exécutable trouvé dans le dossier")?;
 
     let chemin_icone = dossier_app_final.join("icon.png");
