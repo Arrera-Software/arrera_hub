@@ -4,6 +4,7 @@ use std::io::{self, Write};
 use crate::depots::gest_depots::{get_link_download, get_name_application, get_version_application};
 use futures_util::StreamExt;
 use zip::ZipArchive;
+use std::path::Path;
 
 
 #[cfg(target_os = "linux")]
@@ -16,7 +17,7 @@ use {
 use {
     mslnk::ShellLink,
     fs_extra::dir::{CopyOptions},
-    std::path::{Path, PathBuf},
+    std::path::{PathBuf},
 };
 
 #[cfg(target_os = "macos")]
