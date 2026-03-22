@@ -52,7 +52,13 @@ impl ArreraHub {
     }
 
     pub async fn update_soft(&self) -> Result<(), Box<dyn std::error::Error>> {
-        load_depots().await?;
+        let apps_to_update = self.update_check().await?;
+
+        for soft in apps_to_update {
+            self.uninstall_soft(&soft.name).await?;
+            self.install_soft(&soft.name).await?;
+        }
+
         Ok(())
     }
     pub fn get_soft_available(&self) -> Result<Vec<Item>, Box<dyn Error>> {

@@ -43,10 +43,14 @@ async fn main() {
             }
         }else if args[1] == "check-update" {
             let list_soft = hub.update_check().await.unwrap();
-            println!("Logiciel a mettre a jour :");
-            for software in list_soft {
-                println!("- {}", software.name);
-            }
+            if list_soft.len() > 0{
+                println!("Application arrêtera à mettre à jour");
+                for software in list_soft {
+                    println!("- {}", software.name);
+                }
+                println!("Lancer la commande update pour tous les mettre à jour");
+            }else{println!("Toutes les applications Arrera sont à jour.");}
+
         }else if args[1] == "uninstall" {
             if args.len() > 2 {
                 let soft = args[2].clone();
@@ -57,6 +61,12 @@ async fn main() {
                 }
             } else {
                 println!("uninstall (name software)");
+            }
+        } else if args[1] == "update" {
+            println!("Mise à jour des applications Arrera ...");
+            match hub.update_soft().await {
+                Ok(_) => println!("Toutes les mises à jour ont été installées avec succès."),
+                Err(e) => println!("Erreur lors de la mise à jour : {}", e),
             }
         }
     } else {
