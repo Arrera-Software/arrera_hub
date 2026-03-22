@@ -43,7 +43,7 @@ async fn main() {
             }
         }else if args[1] == "check-update" {
             let list_soft = hub.update_check().await.unwrap();
-            println!("Lagiciel a mettre a jour :");
+            println!("Logiciel a mettre a jour :");
             for software in list_soft {
                 println!("- {}", software.name);
             }
