@@ -13,7 +13,7 @@ async fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() > 1 {
         if args[1] == "help" {
-            println!("Arrera Hub\n- help \n- about\n- available\n- update\n- check-update")
+            println!("Arrera Hub\n- install\n- uninstall\n- installed\n- help \n- about\n- available\n- update\n- check-update")
         } else if args[1] == "about" {
             println!("Arrera Hub by Arrera Software");
             println!("Version I2026-0.00");
@@ -70,7 +70,7 @@ async fn main() {
             }
         }
     } else {
-        println!("Arrera Hub\n- help \n- about\n- available\n- update")
+        println!("Arrera Hub\n- install\n- uninstall\n- installed\n- help \n- about\n- available\n- update\n- check-update")
 
     }
 }

@@ -164,14 +164,6 @@ pub async fn get_version_application(cathegorie: &str, nom: &str) -> String {
         _ => String::new(),
     };
 }
-
-pub fn check_date() -> bool{
-    match read_conf("load_index"){
-        Some(v) => return v == Local::now().format("%d/%m/%Y").to_string(),
-        None => return false
-    }
-}
-
 pub fn get_all_software() -> Result<Vec<Item>, Box<dyn std::error::Error>> {
     let index_path = get_path_index()?;
     let data = fs::read_to_string(index_path)?;
