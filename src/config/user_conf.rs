@@ -44,7 +44,7 @@ fn get_path_config () -> String
     return config_path.to_string_lossy().to_string();
 }
 
-pub fn add_conf(cles : &str, valeur : &str)-> Result<(), Box<dyn std::error::Error>>{
+pub fn add_conf(cathegorie : &str,cles : &str, valeur : &str)-> Result<(), Box<dyn std::error::Error>>{
     if cles.is_empty() || valeur.is_empty() {
         return Err("La clé ou la valeur ne peut pas être vide".into());
     }
@@ -54,7 +54,7 @@ pub fn add_conf(cles : &str, valeur : &str)-> Result<(), Box<dyn std::error::Err
     let mut conf = Ini::load_from_file(&path_config_file).
         unwrap_or_else(|_| Ini::new());
 
-    conf.with_section(Some("general"))
+    conf.with_section(Some(cathegorie))
         .set(cles, valeur);
 
     conf.write_to_file(&path_config_file)?;

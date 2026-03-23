@@ -63,7 +63,7 @@ pub fn save_index(content: &str) -> Result<(), Box<dyn std::error::Error>> {
     let maintenant = Local::now();
     let date_string = maintenant.format("%d/%m/%Y").to_string();
 
-    add_conf("load_index",&date_string)?;
+    add_conf("general","load_index",&date_string)?;
 
     fs::write(dir, content)?;
 

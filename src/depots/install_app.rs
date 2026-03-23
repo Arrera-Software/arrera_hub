@@ -100,7 +100,7 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
 
     let version_app = get_version_application(cathegorie,nom).await;
 
-    add_conf(&nom.to_lowercase(), &version_app)?;
+    add_conf("general",&nom.to_lowercase(), &version_app)?;
     result
 }
 #[cfg(target_os = "macos")]

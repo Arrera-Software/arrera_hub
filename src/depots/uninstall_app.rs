@@ -21,7 +21,7 @@ pub async fn uninstall_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn st
     #[cfg(target_os = "macos")]
     let result = uninstall_macos(cathegorie, nom).await;
 
-    add_conf(&nom.to_lowercase(), "NONE")?;
+    add_conf("general",&nom.to_lowercase(), "NONE")?;
 
     result
 }

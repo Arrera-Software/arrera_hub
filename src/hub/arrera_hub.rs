@@ -15,7 +15,9 @@ impl ArreraHub {
             load_depots().await?;
             let list_soft = get_all_software()?;
             for software in list_soft {
-                add_conf(&*software.name.as_str().to_lowercase(), "NONE")?;
+                add_conf("general",&*software.name.as_str().to_lowercase(), "NONE")?;
+                #[cfg(target_os = "macos")]
+                add_conf("directory",&*software.name.as_str().to_lowercase(), "NONE")?;
             }
         }
 
