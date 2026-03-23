@@ -61,13 +61,13 @@ pub fn add_conf(cathegorie : &str,cles : &str, valeur : &str)-> Result<(), Box<d
 
     Ok(())
 }
-pub fn read_conf(cles: &str) -> Option<String> {
+pub fn read_conf(cathegorie : &str,cles: &str) -> Option<String> {
     let path_config_file: String = get_path_config();
 
     let conf = Ini::load_from_file(path_config_file).ok()?;
 
     let value = conf
-        .section(Some("general"))
+        .section(Some(cathegorie))
         .and_then(|section| section.get(cles))
         .map(|v| v.to_string());
 

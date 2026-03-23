@@ -89,7 +89,7 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
     let result = install_linux(target_dir.to_str().unwrap(), cathegorie, nom).await;
 
     #[cfg(target_os = "macos")]
-    let result = install_dmg(target_dir.to_str().unwrap());
+    let result = install_dmg(&nom.to_lowercase(),target_dir.to_str().unwrap());
 
     if zip_path.exists() {
         let _ = fs::remove_file(&zip_path);
@@ -104,7 +104,7 @@ pub async fn install_app(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
     result
 }
 #[cfg(target_os = "macos")]
-fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn install_dmg(name_app: &str,outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut dmg_file_path: Option<PathBuf> = None;
 
     for entry in fs::read_dir(outpath)? {
@@ -161,6 +161,7 @@ fn install_dmg(outpath: &str) -> Result<(), Box<dyn std::error::Error>> {
     let app_path = app_path.ok_or("Aucune application (.app) trouvée dans le DMG monté")?;
     let app_name = app_path.file_name().unwrap().to_string_lossy();
     let dest_path = format!("/Applications/{}", app_name);
+    add_conf("directory", name_app, &dest_path)?;
     let ditto_status = Command::new("ditto")
         .args([app_path.to_str().unwrap(), &dest_path])
         .status()?;

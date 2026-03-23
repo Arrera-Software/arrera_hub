@@ -1,6 +1,6 @@
 use std::fs;
 use std::path::{Path, PathBuf};
-use crate::config::user_conf::{add_conf};
+use crate::config::user_conf::{add_conf, read_conf};
 
 #[cfg(target_os = "windows")]
 use {
@@ -31,7 +31,8 @@ async fn uninstall_macos(cathegorie: &str, nom: &str) -> Result<(), Box<dyn std:
     let app_name = get_name_application(cathegorie, nom).await;
 
     // Essayer de supprimer avec le nom exact
-    let app_dir = format!("/Applications/{}.app", app_name);
+    let app_dir = read_conf("directory", &app_name.to_lowercase()).unwrap_or_else(|| String::new());
+    println!("Trying to uninstall {} from path: {}", app_name, app_dir);
     let path = Path::new(&app_dir);
 
     if path.exists() {

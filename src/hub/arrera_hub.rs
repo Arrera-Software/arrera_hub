@@ -31,7 +31,7 @@ impl ArreraHub {
         let mut updates_available = Vec::new();
 
         for soft in all_soft {
-            if let Some(version_conf) = read_conf(&soft.name.to_lowercase()) {
+            if let Some(version_conf) = read_conf("general",&soft.name.to_lowercase()) {
                 if version_conf != "NONE" {
                     let mut target_category = None;
                     if crate::depots::gest_depots::get_img_application("application", &soft.name).is_ok() {
@@ -72,7 +72,7 @@ impl ArreraHub {
         let mut installed_soft = Vec::new();
 
         for soft in all_soft {
-            if let Some(version) = read_conf(&soft.name.to_lowercase()) {
+            if let Some(version) = read_conf("general",&soft.name.to_lowercase()) {
                 if version != "NONE" {
                     installed_soft.push(soft);
                 }
@@ -102,7 +102,7 @@ impl ArreraHub {
 
     pub async fn uninstall_soft(&self, name: &str) -> Result<(), Box<dyn std::error::Error>> {
         // Vérification de l'installation de l'application via la configuration
-        if let Some(version) = read_conf(&name.to_lowercase()) {
+        if let Some(version) = read_conf("general",&name.to_lowercase()) {
             if version == "NONE" {
                 return Err("L'application n'est pas installée.".into());
             }
