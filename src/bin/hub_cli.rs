@@ -1,10 +1,5 @@
 use std::env;
-
-mod hub;
-mod depots;
-mod config;
-
-
+use arrera_hub::hub;
 #[tokio::main]
 async fn main() {
 
