@@ -9,10 +9,14 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    arrera_qt/apushbutton.cpp \
+    arrera_qt/arrera_theme.cpp \
     main.cpp \
     hub_gui.cpp
 
 HEADERS += \
+    arrera_qt/apushbutton.h \
+    arrera_qt/arrera_theme.h \
     hub_gui.h
 
 FORMS += \
@@ -22,3 +26,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    ressource.qrc
