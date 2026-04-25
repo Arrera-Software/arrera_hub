@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/theme">
+        <file>asset/theme/theme_default.json</file>
+    </qresource>
+    <qresource prefix="/icone">
+        <file>asset/icone/linux_win.png</file>
+        <file>asset/icone/mac.png</file>
+    </qresource>
+</RCC>
