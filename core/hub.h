@@ -1,9 +1,28 @@
 #include <QString>
+#include <QSettings>
+#include <QStandardPaths>
+#include <QDir>
+// Partie reseau
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QEventLoop>
+// Partie JSON
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonParseError>
 
-class Hub
+// Debug
+#include <iostream>
+using namespace std;
+
+class Hub : public QObject
 {
+    Q_OBJECT
+
     public:
-        Hub(QString url);
+        explicit Hub(QObject *parent = nullptr);
+        explicit Hub(QString url = "", QObject *parent = nullptr);
         virtual ~Hub();
         // Gestion de depots
         bool update_depots();
@@ -23,4 +42,15 @@ class Hub
     protected:
 
     private:
+        // Atribut
+        QString config_folder,config_file;
+        QString depots_url;
+        QSettings* setting_file;
+        bool depots_url_saved, setting_loaded,config_init = false,file_created = false;
+        // Methode
+        bool write_setting(const QString &key, const QString &value);
+
+    signals:
+        void depotsUpdated(bool success);
+
 };
