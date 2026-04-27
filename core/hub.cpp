@@ -120,7 +120,7 @@ bool Hub::uninstall_software(QString soft)
     return true;
 }
 
-bool Hub::udpate_software(QString soft)
+bool Hub::update_software(QString soft)
 {
     return true;
 }

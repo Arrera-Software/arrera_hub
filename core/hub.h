@@ -42,8 +42,6 @@ class Hub : public QObject
         // Methode utilitaire
         void quit();
 
-    protected:
-
     private:
         // Atribut
         QString config_folder,config_file;

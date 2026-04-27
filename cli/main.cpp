@@ -16,13 +16,13 @@ int main(int argc, char *argv[]){
     QObject::connect(&arrera_hub, &Hub::depotsUpdated, &a,&QCoreApplication::quit);
 
 
-    /*
+
     cout << "Update depots" << endl;
-    arrera_hub.update_depots();*/
+    arrera_hub.update_depots();
 
 
 
-    cout << "Liste des logiciel installer :\n";
+     /*cout << "Liste des logiciel installer :\n";
     QStringList list_installed = arrera_hub.get_soft_installed();
 
     for (const QString l:list_installed){
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
         cout << "- " + l.toStdString()+"\n";
     }
 
-    cout << endl;
+    cout << endl;*/
 
 
 
