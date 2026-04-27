@@ -16,20 +16,29 @@ int main(int argc, char *argv[]){
     QObject::connect(&arrera_hub, &Hub::depotsUpdated, &a,&QCoreApplication::quit);
 
 
-
-    cout << "Update depots" << endl;
-    arrera_hub.update_depots();
-
-
     /*
-    cout << "Liste depots :\n";
-    QStringList list = arrera_hub.get_soft_installed();
+    cout << "Update depots" << endl;
+    arrera_hub.update_depots();*/
 
-    for (const QString l:list){
+
+
+    cout << "Liste des logiciel installer :\n";
+    QStringList list_installed = arrera_hub.get_soft_installed();
+
+    for (const QString l:list_installed){
         cout << "- " + l.toStdString()+"\n";
     }
 
-    cout << endl;*/
+    cout << "Liste des logiciel disponible :\n";
+    QStringList list_soft = arrera_hub.get_soft_available();
+
+    for (const QString l:list_soft){
+        cout << "- " + l.toStdString()+"\n";
+    }
+
+    cout << endl;
+
+
 
     // Declenche la fermeture une fois la boucle Qt demarree.
     QTimer::singleShot(0, &arrera_hub, &Hub::quit);

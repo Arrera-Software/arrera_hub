@@ -110,17 +110,17 @@ QStringList Hub::get_software_with_update()
     return {};
 }
 
-bool Hub::get_software_udpate(QString soft)
-{
-    return true;
-}
-
 bool Hub::install_software(QString soft)
 {
     return true;
 }
 
 bool Hub::uninstall_software(QString soft)
+{
+    return true;
+}
+
+bool Hub::udpate_software(QString soft)
 {
     return true;
 }
