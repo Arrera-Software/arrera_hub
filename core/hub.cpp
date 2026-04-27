@@ -85,6 +85,7 @@ bool Hub::update_depots()
 
             if (file_created){
                 update_depots();
+
                 QStringList list_soft = get_soft_available();
                 for(const QString &soft : list_soft){
                     write_setting(soft,"none");
@@ -172,7 +173,24 @@ QStringList Hub::get_soft_available()
 
 QStringList Hub::get_soft_installed()
 {
-    return {};
+    QStringList out;
+
+    setting_file->beginGroup("software");
+    QStringList key = setting_file->allKeys();
+    setting_file->endGroup();
+
+    for (const QString soft : key){
+        QString v = read_valeur(soft);
+
+        if (v != "none" && v != "error"){
+            out.append(soft);
+        }
+    }
+    return out;
+}
+
+void Hub::quit(){
+    emit finnish();
 }
 
 // Methode private
@@ -184,4 +202,13 @@ bool Hub::write_setting(const QString &key, const QString &value)
     setting_file->setValue("software/" + key, value);
     setting_file->sync();
     return true;
+}
+
+QString Hub::read_valeur(const QString &key){
+    if (!setting_loaded) return "error";
+    if (key.isEmpty()) return "error";
+    setting_file->beginGroup("software");
+    QString val = setting_file->value(key, "error").toString();
+    setting_file->endGroup();
+    return val;
 }

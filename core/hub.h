@@ -39,6 +39,9 @@ class Hub : public QObject
         QStringList get_soft_available();
         QStringList get_soft_installed();
 
+        // Methode utilitaire
+        void quit();
+
     protected:
 
     private:
@@ -49,8 +52,10 @@ class Hub : public QObject
         bool depots_url_saved, setting_loaded,config_init = false,file_created = false;
         // Methode
         bool write_setting(const QString &key, const QString &value);
+        QString read_valeur(const QString &key);
 
     signals:
         void depotsUpdated(bool success);
+        void finnish();
 
 };
