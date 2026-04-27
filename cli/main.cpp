@@ -1,5 +1,6 @@
 #include <iostream>
 #include <QCoreApplication>
+#include <QTimer>
 #include "../core/hub.h"
 
 using namespace std;
@@ -14,13 +15,13 @@ int main(int argc, char *argv[]){
     QObject::connect(&arrera_hub, &Hub::finnish, &a,&QCoreApplication::quit);
     QObject::connect(&arrera_hub, &Hub::depotsUpdated, &a,&QCoreApplication::quit);
 
-    /*
+
 
     cout << "Update depots" << endl;
     arrera_hub.update_depots();
-    */
 
 
+    /*
     cout << "Liste depots :\n";
     QStringList list = arrera_hub.get_soft_installed();
 
@@ -28,9 +29,10 @@ int main(int argc, char *argv[]){
         cout << "- " + l.toStdString()+"\n";
     }
 
-    cout << endl;
+    cout << endl;*/
 
-    arrera_hub.quit();
+    // Declenche la fermeture une fois la boucle Qt demarree.
+    QTimer::singleShot(0, &arrera_hub, &Hub::quit);
 
     return a.exec();
 }
