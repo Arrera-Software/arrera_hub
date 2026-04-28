@@ -6,6 +6,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QEventLoop>
+#include <QProcess>
 // Partie JSON
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -28,14 +29,12 @@ class Hub : public QObject
         bool update_depots();
 
         // Mise a jour des logiel
-        QStringList get_software_with_update();
+        void check_software_update(QString soft);
 
         //Installation et desinstallation des logiciel
-        bool install_software(QString soft);
+        void install_software(QString soft);
         bool uninstall_software(QString soft);
         bool update_software(QString soft);
-
-        void check_software_update(QString soft);
 
         // Methode pour avoir sur les logicel
         QStringList get_soft_available();
@@ -62,5 +61,8 @@ class Hub : public QObject
         void depotsUpdated(bool success);
         void update_check(QString soft,bool update);
         void finnish();
+
+        // Download
+        void app_installed(bool succes);
 
 };

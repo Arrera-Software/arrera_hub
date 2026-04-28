@@ -106,25 +106,201 @@ bool Hub::update_depots()
     }
 }
 
-QStringList Hub::get_software_with_update()
-{
-    return {};
+void Hub::check_software_update(QString soft){
+    get_dict_software(soft, [this, soft](QJsonObject dict) {
+
+        if (dict.isEmpty()) {
+            return;
+        }
+
+        QString version_depots = dict.value("version").toString();
+        QString version_local = read_valeur(soft);
+
+        if ((version_local == "error" || version_local == version_depots)) {
+            emit update_check(soft, false);
+        }else if (version_local == "none"){
+            emit update_check(soft,false);
+        } else {
+            emit update_check(soft, true);
+        }
+
+    });
 }
 
-bool Hub::install_software(QString soft)
+void Hub::install_software(QString soft)
 {
+    #if defined(Q_OS_LINUX)
+
+    get_dict_software(soft, [this, soft](QJsonObject dict) {
+        if (dict.isEmpty()) {
+            emit app_installed(false);
+            return;
+        }
+
+        QString url_download = dict.value("download_linux").toString();
+        QString version = dict.value("version").toString();
+        if (url_download.isEmpty() || version.isEmpty()) {
+            emit app_installed(false);
+        }
+
+        QUrl url(url_download);
+        QFileInfo fileInfo(url.path());
+        QString folderName = fileInfo.baseName();
+
+        if (folderName.isEmpty()) folderName = soft.toLower().replace(" ", "_");
+
+        QString appInstallDir = QDir::homePath() + "/Applications/";
+        QString zipPath = QDir::tempPath() + "/" + folderName + ".zip";
+
+        QDir().mkpath(appInstallDir);
+
+        QNetworkAccessManager *dlManager = new QNetworkAccessManager(this);
+        QNetworkRequest request(url);
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+        QNetworkReply *reply = dlManager->get(request);
+
+        connect(reply, &QNetworkReply::finished, [this, reply, dlManager, zipPath, appInstallDir, soft, folderName,version]() {
+            if (reply->error() == QNetworkReply::NoError) {
+                QString iconPath = "system-run";
+                QFile file(zipPath);
+                if (file.open(QIODevice::WriteOnly)) {
+                    file.write(reply->readAll());
+                    file.close();
+
+                    QProcess::execute("unzip", {"-o","-q", zipPath, "-d", appInstallDir});
+
+                    QDir appDir(appInstallDir + "/" + folderName);
+
+                    QString executableName;
+                    appDir.setFilter(QDir::Files | QDir::NoSymLinks);
+                    QFileInfoList fileList = appDir.entryInfoList();
+
+                    for (const QFileInfo &fileInfo : fileList) {
+                        QString name = fileInfo.fileName();
+
+                        if (name != "launch.sh" && !name.endsWith(".bat") && !name.endsWith(".dll")) {
+                            executableName = name;
+                            break;
+                        }
+                    }
+
+                    for (const QFileInfo &fileInfo : fileList) {
+                        QString name = fileInfo.fileName();
+                        if (name.endsWith(".png", Qt::CaseInsensitive)) {
+                            iconPath = fileInfo.absoluteFilePath();
+                            break;
+                        }
+                    }
+
+                    if (iconPath == "system-run") {
+                        QDir assetDir(appInstallDir+ "/" + folderName + "/asset/icon/linux");
+                        if (assetDir.exists()) {
+                            assetDir.setFilter(QDir::Files | QDir::NoSymLinks);
+                            QFileInfoList assetFiles = assetDir.entryInfoList();
+
+                            for (const QFileInfo &fileInfo : assetFiles) {
+                                if (fileInfo.fileName().endsWith(".png", Qt::CaseInsensitive)) {
+                                    iconPath = fileInfo.absoluteFilePath();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (iconPath == "system-run") {
+                        QDir assetDir(appInstallDir+ "/" + folderName + "/asset/icone/linux");
+
+                        if (assetDir.exists()) {
+                            assetDir.setFilter(QDir::Files | QDir::NoSymLinks);
+                            QFileInfoList assetFiles = assetDir.entryInfoList();
+
+                            for (const QFileInfo &fileInfo : assetFiles) {
+                                if (fileInfo.fileName().endsWith(".png", Qt::CaseInsensitive)) {
+                                    iconPath = fileInfo.absoluteFilePath();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!executableName.isEmpty()) {
+                        QString exePath = appInstallDir +folderName+"/"+ executableName;
+                        QProcess::execute("chmod", {"+x", exePath});
+                    }
+
+                    QString shPath = appInstallDir+folderName+ "/launch.sh";
+                    QFile shFile(shPath);
+                    if (shFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                        QTextStream out(&shFile);
+                        out << "#!/bin/bash\n";
+                        out << "cd \"$(dirname \"$0\")\"\n";
+                        out << "./\"" << executableName << "\"\n";
+                        shFile.close();
+
+                        shFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+                                              QFileDevice::ReadGroup | QFileDevice::ExeGroup |
+                                              QFileDevice::ReadOther | QFileDevice::ExeOther);
+                    }
+
+                    QString desktopPath = QDir::homePath() + "/.local/share/applications/" + soft + ".desktop";
+                    QFile dFile(desktopPath);
+                    if (dFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                        QTextStream out(&dFile);
+                        out << "[Desktop Entry]\n"
+                            << "Name=" << soft << "\n"
+                            << "Exec=" << shPath << "\n"
+                            << "Path=" << appInstallDir << "\n"
+                            << "Icon=" << iconPath << "\n"
+                            << "Type=Application\n"
+                            << "Terminal=false\n";
+                        dFile.close();
+
+                        dFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+                    }else emit app_installed(false);
+
+                    write_setting(soft,version);
+                    app_installed(true);
+
+                }else app_installed(false);
+            }else emit app_installed(false);
+
+            QFile::remove(zipPath);
+            reply->deleteLater();
+            dlManager->deleteLater();
+        });
+    });
+
+    #elif defined(Q_OS_MAC)
     return true;
+    #elif defined(Q_OS_WIN)
+    return true;
+    #else
+    return false;
+    #endif
 }
 
 bool Hub::uninstall_software(QString soft)
 {
+    #if defined(Q_OS_LINUX)
+
     return true;
+
+
+    #elif defined(Q_OS_MAC)
+    return true;
+    #elif defined(Q_OS_WIN)
+    return true;
+    #else
+    return false;
+    #endif
 }
 
 bool Hub::update_software(QString soft)
 {
     return true;
 }
+
 
 QStringList Hub::get_soft_available()
 {
@@ -236,26 +412,6 @@ QString Hub::get_url_img(QString soft){
 }
 
 // Methode private
-
-void Hub::check_software_update(QString soft){
-    get_dict_software(soft, [this, soft](QJsonObject dict) {
-
-        if (dict.isEmpty()) {
-            cout << "Impossible de récupérer les données pour" << soft.toStdString() << endl;
-            return;
-        }
-
-        QString version_depots = dict.value("version").toString();
-        QString version_local = read_valeur(soft);
-
-        if (version_local == "error" || version_local == version_depots) {
-            emit update_check(soft, false);
-        } else {
-            emit update_check(soft, true);
-        }
-
-    });
-}
 
 void Hub::get_dict_software(QString soft, std::function<void(QJsonObject)> callback) {
     // 1. Ouvrir le fichier local "depots.json"

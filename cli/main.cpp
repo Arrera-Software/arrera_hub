@@ -18,7 +18,15 @@ int main(int argc, char *argv[]){
         if (updateAvailable) {
             cout << "Génial ! Une mise à jour est disponible pour :" << soft.toStdString() << endl;
         } else {
-            cout << "Pas de mise a jour :" << soft.toStdString() << endl;
+            cout << "Pas de mise a jour : " << soft.toStdString() << endl;
+        }
+    });
+
+    QObject::connect(&arrera_hub, &Hub::app_installed, &a, [](bool succes) {
+        if (succes) {
+            cout << "Application installer" << endl;
+        } else {
+            cout << "Application pas installer" << endl;
         }
     });
 
@@ -48,7 +56,8 @@ int main(int argc, char *argv[]){
 
     cout << endl;*/
 
-
+    arrera_hub.install_software("six");
+    arrera_hub.install_software("arrera");
 
     // Declenche la fermeture une fois la boucle Qt demarree.
     //QTimer::singleShot(0, &arrera_hub, &Hub::quit);
