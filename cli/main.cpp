@@ -14,15 +14,25 @@ int main(int argc, char *argv[]){
 
     QObject::connect(&arrera_hub, &Hub::finnish, &a,&QCoreApplication::quit);
     QObject::connect(&arrera_hub, &Hub::depotsUpdated, &a,&QCoreApplication::quit);
+    QObject::connect(&arrera_hub, &Hub::update_check, &a, [](QString soft, bool updateAvailable) {
+        if (updateAvailable) {
+            cout << "Génial ! Une mise à jour est disponible pour :" << soft.toStdString() << endl;
+        } else {
+            cout << "Pas de mise a jour :" << soft.toStdString() << endl;
+        }
+    });
 
+    arrera_hub.check_software_update("six");
 
+    //cout << arrera_hub.get_url_img("six").toStdString() << endl;
 
+    /*
     cout << "Update depots" << endl;
     arrera_hub.update_depots();
 
 
 
-     /*cout << "Liste des logiciel installer :\n";
+    cout << "Liste des logiciel installer :\n";
     QStringList list_installed = arrera_hub.get_soft_installed();
 
     for (const QString l:list_installed){
@@ -41,7 +51,7 @@ int main(int argc, char *argv[]){
 
 
     // Declenche la fermeture une fois la boucle Qt demarree.
-    QTimer::singleShot(0, &arrera_hub, &Hub::quit);
+    //QTimer::singleShot(0, &arrera_hub, &Hub::quit);
 
     return a.exec();
 }

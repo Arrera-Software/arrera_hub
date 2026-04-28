@@ -33,7 +33,9 @@ class Hub : public QObject
         //Installation et desinstallation des logiciel
         bool install_software(QString soft);
         bool uninstall_software(QString soft);
-        bool udpate_software(QString soft);
+        bool update_software(QString soft);
+
+        void check_software_update(QString soft);
 
         // Methode pour avoir sur les logicel
         QStringList get_soft_available();
@@ -42,18 +44,23 @@ class Hub : public QObject
         // Methode utilitaire
         void quit();
 
+        // Methode pour l'URL IMG
+        QString get_url_img(QString soft);
+
     private:
         // Atribut
-        QString config_folder,config_file;
+        QString config_folder,config_file,depots_file;
         QString depots_url;
         QSettings* setting_file;
         bool depots_url_saved, setting_loaded,config_init = false,file_created = false;
         // Methode
         bool write_setting(const QString &key, const QString &value);
         QString read_valeur(const QString &key);
+        void get_dict_software(QString soft, function<void(QJsonObject)> callback);
 
     signals:
         void depotsUpdated(bool success);
+        void update_check(QString soft,bool update);
         void finnish();
 
 };

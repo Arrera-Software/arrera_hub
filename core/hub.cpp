@@ -74,6 +74,7 @@ bool Hub::update_depots()
             if (reply->error() == QNetworkReply::NoError) {
                 QByteArray data = reply->readAll();
                 QString filename = config_folder + "/depots.json";
+                depots_file = filename;
                 QFile file(filename);
 
                 if (file.open(QIODevice::WriteOnly)) {
@@ -156,9 +157,8 @@ QStringList Hub::get_soft_available()
 
                 for (int i = 0; i < appArray.size(); ++i) {
 
-                    QJsonObject appObj = appArray[i].toObject(); // On récupère l'objet {"name": "...", "url": "..."}
+                    QJsonObject appObj = appArray[i].toObject();
 
-                    // On extrait le nom et on l'ajoute à notre liste C++
                     if (appObj.contains("name")) {
                         QString nom = appObj["name"].toString();
                         liste_noms.append(nom);
@@ -193,7 +193,148 @@ void Hub::quit(){
     emit finnish();
 }
 
+QString Hub::get_url_img(QString soft){
+    QFile file(config_folder + "/depots.json");
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        cout << "fichier non ouvert " << depots_file.toStdString() << endl;
+        return "error";
+    }
+
+    QByteArray data = file.readAll();
+    file.close();
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+    if (error.error != QJsonParseError::NoError) {
+        cout << "Erreur pars " << endl;
+        return "error";
+    }
+
+    if (doc.isObject()) {
+        QJsonObject root = doc.object();
+
+        for (const QString& key : root.keys()) {
+            QJsonValue val = root.value(key);
+
+            if (val.isArray()) {
+                QJsonArray array = val.toArray();
+                for (const QJsonValue& item : array) {
+                    if (item.isObject()) {
+                        QJsonObject obj = item.toObject();
+                        if (obj.value("name").toString().compare(
+                                soft, Qt::CaseInsensitive) == 0) {
+                            return obj.value("img").toString();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return "error";
+}
+
 // Methode private
+
+void Hub::check_software_update(QString soft){
+    get_dict_software(soft, [this, soft](QJsonObject dict) {
+
+        if (dict.isEmpty()) {
+            cout << "Impossible de récupérer les données pour" << soft.toStdString() << endl;
+            return;
+        }
+
+        QString version_depots = dict.value("version").toString();
+        QString version_local = read_valeur(soft);
+
+        if (version_local == "error" || version_local == version_depots) {
+            emit update_check(soft, false);
+        } else {
+            emit update_check(soft, true);
+        }
+
+    });
+}
+
+void Hub::get_dict_software(QString soft, std::function<void(QJsonObject)> callback) {
+    // 1. Ouvrir le fichier local "depots.json"
+    QFile file(config_folder + "/depots.json");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        callback(QJsonObject()); // Erreur -> on retourne un JSON vide
+        return;
+    }
+
+    QByteArray data = file.readAll();
+    file.close();
+
+    // 2. Parser le fichier local
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+    if (error.error != QJsonParseError::NoError || !doc.isObject()) {
+        callback(QJsonObject()); // Erreur de syntaxe locale
+        return;
+    }
+
+    QString targetUrl = "";
+    QJsonObject root = doc.object();
+
+    // 3. Chercher l'URL du logiciel ciblé
+    for (const QString& key : root.keys()) {
+        QJsonValue val = root.value(key);
+
+        if (val.isArray()) {
+            QJsonArray array = val.toArray();
+            for (const QJsonValue& item : array) {
+                if (item.isObject()) {
+                    QJsonObject obj = item.toObject();
+                    if (obj.value("name").toString().compare(soft, Qt::CaseInsensitive) == 0) {
+                        targetUrl = obj.value("url").toString();
+                        break;
+                    }
+                }
+            }
+        }
+        if (!targetUrl.isEmpty()) break;
+    }
+
+    // Si on n'a pas trouvé le logiciel ou l'URL
+    if (targetUrl.isEmpty()) {
+        callback(QJsonObject());
+        return;
+    }
+
+    // 4. Lancer la requête réseau asynchrone
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    QNetworkRequest request((QUrl(targetUrl)));
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    QNetworkReply *reply = manager->get(request);
+
+    // 5. Connecter le signal de fin au traitement (Lambda)
+    QObject::connect(reply, &QNetworkReply::finished, [manager, reply, callback]() {
+        QJsonObject resultObj;
+
+        // Si le téléchargement a réussi
+        if (reply->error() == QNetworkReply::NoError) {
+            QByteArray remoteData = reply->readAll();
+            QJsonParseError remoteError;
+            QJsonDocument remoteDoc = QJsonDocument::fromJson(remoteData, &remoteError);
+
+            // Si le JSON distant est valide
+            if (remoteError.error == QJsonParseError::NoError && remoteDoc.isObject()) {
+                resultObj = remoteDoc.object();
+            }
+        }
+
+        // On déclenche le callback en lui passant le résultat (rempli ou vide)
+        callback(resultObj);
+
+        // On nettoie la mémoire proprement
+        reply->deleteLater();
+        manager->deleteLater();
+    });
+}
 
 bool Hub::write_setting(const QString &key, const QString &value)
 {
