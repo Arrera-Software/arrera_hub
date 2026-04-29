@@ -90,6 +90,7 @@ bool Hub::update_depots()
                 QStringList list_soft = get_soft_available();
                 for(const QString &soft : list_soft){
                     write_setting(soft,"none");
+                    write_setting(soft+"_install","none");
                 }
                 file_created = false;
             }
@@ -294,7 +295,7 @@ void Hub::install_software(QString soft)
 
         QNetworkReply *reply = dlManager->get(request);
 
-        connect(reply, &QNetworkReply::finished, [this, reply, dlManager, zipPath,folderName]() {
+        connect(reply, &QNetworkReply::finished, [this,soft,version, reply, dlManager, zipPath,folderName]() {
             if (reply->error() == QNetworkReply::NoError) {
                 QFile file(zipPath);
 
@@ -354,6 +355,9 @@ void Hub::install_software(QString soft)
                         copyProcess.start("cp", QStringList() << "-R" << sourceAppPath << destDir);
                         copyProcess.waitForFinished();
 
+                        QString appName = QFileInfo(sourceAppPath).fileName();
+                        QString cheminFinal = destDir + "/" + appName;
+
                         if (copyProcess.exitCode() == 0) {
                             QProcess::execute("hdiutil", QStringList() << "detach" << volumePath << "-quiet");
 
@@ -365,6 +369,9 @@ void Hub::install_software(QString soft)
                             if (dirToClean.exists()) {
                                 dirToClean.removeRecursively();
                             }
+
+                            write_setting(soft,version);
+                            write_setting(soft+"_install",cheminFinal);
 
                             emit app_installed(true);
                         }
