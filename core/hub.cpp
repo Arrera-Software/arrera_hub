@@ -387,11 +387,110 @@ void Hub::install_software(QString soft)
             dlManager->deleteLater();
         });
 
-
-
     });
     #elif defined(Q_OS_WIN)
-    return true;
+        get_dict_software(soft, [this, soft](QJsonObject dict) {
+            if (dict.isEmpty()) {
+                emit app_installed(false);
+                return;
+            }
+
+            QString url_download = dict.value("download_windows").toString();
+            QString version = dict.value("version").toString();
+            if (url_download.isEmpty() || version.isEmpty()) {
+                emit app_installed(false);
+            }
+
+            QUrl url(url_download);
+            QFileInfo fileInfo(url.path());
+
+            QString fileName = fileInfo.fileName();
+
+            if (fileName.isEmpty()) fileName = soft.toLower().replace(" ", "_") + ".zip";
+
+            QString zipPath = QDir::tempPath() + "/" + fileName;
+            QString folderName = fileInfo.baseName();
+
+            QString applicationsLocation = QDir(
+                                               QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
+                                               ).absoluteFilePath("Programs")+"/Application/";
+
+            QNetworkAccessManager *dlManager = new QNetworkAccessManager(this);
+            QNetworkRequest request(url);
+            request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+            QNetworkReply *reply = dlManager->get(request);
+
+            cout << applicationsLocation.toStdString() << endl;
+
+            connect(reply, &QNetworkReply::finished, [this,soft,version,reply, dlManager, zipPath,folderName,fileName,applicationsLocation](){
+                if (reply->error() == QNetworkReply::NoError){
+                    QFile file(zipPath);
+
+                    if (file.open(QIODevice::WriteOnly)) {
+                        file.write(reply->readAll());
+                        file.close();
+
+                        QString targetPath = QDir(applicationsLocation).filePath(folderName);
+                        QDir().mkpath(applicationsLocation);
+
+                        QProcess process;
+                        QStringList arguments;
+                        arguments << "-xf" << QDir::toNativeSeparators(zipPath) << "-C" << QDir::toNativeSeparators(applicationsLocation);
+
+                        process.start("tar", arguments);
+                        process.waitForFinished();
+
+                        if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
+                            emit app_installed(false);
+                            return;
+                        }
+
+                        QString exePath;
+                        QDirIterator it(targetPath, QStringList() << "*.exe", QDir::Files, QDirIterator::Subdirectories);
+
+                        while (it.hasNext()) {
+                            QString currentFile = it.next();
+                            exePath = currentFile;
+                            // On s'arrête si le .exe a le même nom que le dossier, sinon on garde le dernier trouvé
+                            if (QFileInfo(currentFile).baseName() == folderName) {
+                                break;
+                            }
+                        }
+
+                        if (exePath.isEmpty()) {
+                            emit app_installed(false);
+                            return;
+                        }
+
+                        QString startMenuPath = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
+                        QString shortcutPath = QDir(startMenuPath).filePath(soft + ".lnk");
+
+                        if (QFile::exists(shortcutPath)) {
+                            QFile::remove(shortcutPath);
+                        }
+
+                        bool shortcutCreated = QFile::link(exePath, shortcutPath);
+
+                        if (!shortcutCreated) {
+                            emit app_installed(false);
+                            return;
+                        }
+
+                        write_setting(soft,version);
+                        write_setting(soft+"_install",targetPath);
+
+                        emit app_installed(true);
+
+
+                    }else{
+                        emit app_installed(false);
+                    }
+                }else {
+                    emit app_installed(false);
+                }
+            });
+        });
     #endif
 }
 
