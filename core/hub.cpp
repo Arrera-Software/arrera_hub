@@ -272,11 +272,119 @@ void Hub::install_software(QString soft)
     });
 
     #elif defined(Q_OS_MAC)
-    return true;
+
+    get_dict_software(soft, [this, soft](QJsonObject dict) {
+        QString url_download = dict.value("download_macos").toString();
+        QString version = dict.value("version").toString();
+
+        if (url_download.isEmpty()) return;
+
+        QUrl url(url_download);
+        QFileInfo fileInfo(url.path());
+        QString fileName = fileInfo.fileName();
+        QString folderName = fileInfo.baseName();
+
+        if (fileName.isEmpty()) fileName = soft.toLower().replace(" ", "_") + ".zip";
+
+        QString zipPath = QDir::tempPath() + "/" + fileName;
+
+        QNetworkAccessManager *dlManager = new QNetworkAccessManager(this);
+        QNetworkRequest request(url);
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+        QNetworkReply *reply = dlManager->get(request);
+
+        connect(reply, &QNetworkReply::finished, [this, reply, dlManager, zipPath,folderName]() {
+            if (reply->error() == QNetworkReply::NoError) {
+                QFile file(zipPath);
+
+                if (file.open(QIODevice::WriteOnly)) {
+                    file.write(reply->readAll());
+                    file.close();
+
+                    QString extractDir = QDir::tempPath() + "/";
+                    QDir().mkpath(extractDir);
+
+                    QProcess::execute("unzip", {"-o","-q", zipPath, "-d", extractDir});
+
+                    extractDir = QDir::tempPath() + "/"+folderName;
+
+                    QDir extDir(extractDir);
+                    extDir.setFilter(QDir::Files | QDir::NoSymLinks);
+                    extDir.setNameFilters({"*.dmg"});
+                    QFileInfoList dmgFiles = extDir.entryInfoList();
+
+                    if (!dmgFiles.isEmpty()) {
+                        QString dmgPath = dmgFiles.first().absoluteFilePath();
+
+                        QProcess::execute("xattr", {"-cr", dmgPath});
+
+                        QProcess mountProcess;
+                        mountProcess.start("hdiutil", QStringList() << "attach" << dmgPath << "-plist" << "-nobrowse");
+                        mountProcess.waitForFinished();
+
+                        QDir volumesDir("/Volumes");
+                        QStringList volumesAvant = volumesDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+                        QString sourceAppPath;
+                        QString volumePath;
+
+                        for (const QString &vol : volumesAvant) {
+                            QDir currentVol("/Volumes/" + vol);
+                            QStringList apps = currentVol.entryList(QStringList() << "*.app", QDir::Dirs);
+                            if (!apps.isEmpty()) {
+                                volumePath = "/Volumes/" + vol;
+                                sourceAppPath = volumePath + "/" + apps.first();
+                                break;
+                            }
+                        }
+
+                        if (sourceAppPath.isEmpty()) {
+                            emit app_installed(false);
+                            return;
+                        }
+
+
+                        QString destDir = "/Applications";
+
+                        QString script = QString("do shell script \"cp -R '%1' '%2'\" with administrator privileges")
+                                             .arg(sourceAppPath, destDir);
+
+                        QProcess copyProcess;
+                        copyProcess.start("cp", QStringList() << "-R" << sourceAppPath << destDir);
+                        copyProcess.waitForFinished();
+
+                        if (copyProcess.exitCode() == 0) {
+                            QProcess::execute("hdiutil", QStringList() << "detach" << volumePath << "-quiet");
+
+                            if (QFile::exists(zipPath)) {
+                                QFile::remove(zipPath);
+                            }
+
+                            QDir dirToClean(extractDir);
+                            if (dirToClean.exists()) {
+                                dirToClean.removeRecursively();
+                            }
+
+                            emit app_installed(true);
+                        }
+
+
+                    } else {
+                        emit app_installed(false);
+                    }
+
+                }
+            }
+            reply->deleteLater();
+            dlManager->deleteLater();
+        });
+
+
+
+    });
     #elif defined(Q_OS_WIN)
     return true;
-    #else
-    return false;
     #endif
 }
 
