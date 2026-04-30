@@ -509,7 +509,11 @@ bool Hub::uninstall_software(QString soft)
                 write_setting(soft,"none");
                 write_setting(soft+"_install","none");
                 #if defined(Q_OS_LINUX)
-                    return true;
+                QString desktopPath = QDir::homePath() + "/.local/share/applications/" + soft + ".desktop";
+                if (QFile::exists(desktopPath)){
+                    QFile::remove(desktopPath);
+                }
+                return true;
                 #elif defined(Q_OS_WIN)
                 QString startMenuPath = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
                 QString shortcutPath = QDir(startMenuPath).filePath(soft + ".lnk");
