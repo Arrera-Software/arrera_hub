@@ -423,8 +423,6 @@ void Hub::install_software(QString soft)
 
             QNetworkReply *reply = dlManager->get(request);
 
-            cout << applicationsLocation.toStdString() << endl;
-
             connect(reply, &QNetworkReply::finished, [this,soft,version,reply, dlManager, zipPath,folderName,fileName,applicationsLocation](){
                 if (reply->error() == QNetworkReply::NoError){
                     QFile file(zipPath);
@@ -509,7 +507,19 @@ bool Hub::uninstall_software(QString soft)
             if (application.removeRecursively()) {
                 write_setting(soft,"none");
                 write_setting(soft+"_install","none");
+                #if defined(Q_OS_LINUX)
+                    return true;
+                #elif defined(Q_OS_WIN)
+                QString startMenuPath = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
+                QString shortcutPath = QDir(startMenuPath).filePath(soft + ".lnk");
+                cout << shortcutPath.toStdString();
+                if (QFile::exists(shortcutPath)){
+                    QFile::remove(shortcutPath);
+                }
                 return true;
+                #elif defined(Q_OS_MAC)
+                return true;
+                #endif
             }else return false;
         } else return false;
     }

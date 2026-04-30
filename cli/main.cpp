@@ -39,7 +39,6 @@ int main(int argc, char *argv[]){
     arrera_hub.update_depots();
 
 
-
     cout << "Liste des logiciel installer :\n";
     QStringList list_installed = arrera_hub.get_soft_installed();
 
