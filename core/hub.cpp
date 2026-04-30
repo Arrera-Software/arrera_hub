@@ -89,8 +89,10 @@ bool Hub::update_depots()
 
                 QStringList list_soft = get_soft_available();
                 for(const QString &soft : list_soft){
-                    write_setting(soft,"none");
-                    write_setting(soft+"_install","none");
+                    QString softLower = soft.toLower();
+
+                    write_setting(softLower,"none");
+                    write_setting(softLower+"_install","none");
                 }
                 file_created = false;
             }
@@ -496,18 +498,21 @@ void Hub::install_software(QString soft)
 
 bool Hub::uninstall_software(QString soft)
 {
-    #if defined(Q_OS_LINUX)
+    QString version = read_valeur(soft);
+    QString emplacement = read_valeur(soft+"_install");
 
-    return true;
+    if (version == "none" && emplacement == "none") return false;
+    else {
+        QDir application(emplacement);
 
-
-    #elif defined(Q_OS_MAC)
-    return true;
-    #elif defined(Q_OS_WIN)
-    return true;
-    #else
-    return false;
-    #endif
+        if (application.exists()) {
+            if (application.removeRecursively()) {
+                write_setting(soft,"none");
+                write_setting(soft+"_install","none");
+                return true;
+            }else return false;
+        } else return false;
+    }
 }
 
 bool Hub::update_software(QString soft)
