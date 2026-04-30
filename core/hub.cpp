@@ -263,7 +263,7 @@ void Hub::install_software(QString soft)
                     }else emit app_installed(false);
 
                     write_setting(soft,version);
-                    write_setting(soft+"_install",appInstallDir);
+                    write_setting(soft+"_install",appDir.path());
                     app_installed(true);
 
                 }else app_installed(false);
