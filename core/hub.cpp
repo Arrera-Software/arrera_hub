@@ -262,10 +262,12 @@ QStringList Hub::get_soft_installed()
     setting_file->endGroup();
 
     for (const QString soft : key){
-        QString v = read_valeur(soft);
+        if (!soft.contains("_install")){
+            QString v = read_valeur(soft);
 
-        if (v != "none" && v != "error"){
-            out.append(soft);
+            if (v != "none" && v != "error"){
+                out.append(soft);
+            }
         }
     }
     return out;
