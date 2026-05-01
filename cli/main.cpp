@@ -55,11 +55,11 @@ int main(int argc, char *argv[]){
 
     cout << endl;*/
 
-    //arrera_hub.install_software("arrera");
+    arrera_hub.install_software("arrera");
 
-    if (arrera_hub.uninstall_software("arrera")){
+    /*if (arrera_hub.uninstall_software("arrera")){
         cout << "Application desinstaller" << endl;
-    }
+    }*/
 
 
     // Declenche la fermeture une fois la boucle Qt demarree.

@@ -35,7 +35,7 @@ class Hub : public QObject
         //Installation et desinstallation des logiciel
         void install_software(QString soft);
         bool uninstall_software(QString soft);
-        bool update_software(QString soft);
+        void update_software(QString soft);
 
         // Methode pour avoir sur les logicel
         QStringList get_soft_available();
@@ -57,6 +57,7 @@ class Hub : public QObject
         bool write_setting(const QString &key, const QString &value);
         QString read_valeur(const QString &key);
         void get_dict_software(QString soft, function<void(QJsonObject)> callback);
+        void perform_installation(const QString& soft, std::function<void(bool)> callback);
 
     signals:
         void depotsUpdated(bool success);
@@ -65,5 +66,5 @@ class Hub : public QObject
 
         // Download
         void app_installed(bool succes);
-
+        void app_update(bool succes);
 };
