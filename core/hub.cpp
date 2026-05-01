@@ -192,7 +192,9 @@ void Hub::update_software(QString soft)
             QDir application(emplacement);
             if (application.exists()) {
                     if (application.removeRecursively()) {
-
+                        perform_installation(soft, [this](bool success) {
+                            emit app_update(success);
+                        });
                     }else emit app_update(false);
             }else emit app_update(false);
         }

@@ -30,6 +30,15 @@ int main(int argc, char *argv[]){
         }
     });
 
+    QObject::connect(&arrera_hub, &Hub::app_update, &a, [](bool succes) {
+        if (succes) {
+            cout << "Application mise a jour" << endl;
+        } else {
+            cout << "Application pas mise a jour" << endl;
+        }
+    });
+
+
     arrera_hub.check_software_update("six");
 
     //cout << arrera_hub.get_url_img("six").toStdString() << endl;
@@ -55,7 +64,8 @@ int main(int argc, char *argv[]){
 
     cout << endl;*/
 
-    arrera_hub.install_software("arrera");
+    //arrera_hub.install_software("arrera");
+    arrera_hub.update_software("arrera");
 
     /*if (arrera_hub.uninstall_software("arrera")){
         cout << "Application desinstaller" << endl;
