@@ -2,6 +2,8 @@
 #define HUB_GUI_H
 
 #include <QMainWindow>
+#include "../core/hub.h"
+#include "arrera_qt/arrera_theme.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -19,5 +21,7 @@ public:
 
 private:
     Ui::hub_gui *ui;
+    Hub hub;
+    Arrera_Theme theme;
 };
 #endif // HUB_GUI_H
