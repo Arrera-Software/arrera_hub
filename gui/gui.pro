@@ -13,6 +13,7 @@ SOURCES += \
     ../core/hub.cpp \
     arrera_qt/apushbutton.cpp \
     arrera_qt/arrera_theme.cpp \
+    arrera_qt/roundedframe.cpp \
     main.cpp \
     hub_gui.cpp
 
@@ -20,6 +21,7 @@ HEADERS += \
     ../core/hub.h \
     arrera_qt/apushbutton.h \
     arrera_qt/arrera_theme.h \
+    arrera_qt/roundedframe.h \
     hub_gui.h
 
 FORMS += \
