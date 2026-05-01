@@ -18,9 +18,11 @@ Hub::Hub(QString url, QObject *parent) : QObject(parent)
 
     #elif defined(Q_OS_WIN)
         config_init = true;
-        QString base_dir= QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"\\arrera-hub";
+        // GenericConfigLocation pointe vers AppData/Roaming
+        QString roaming = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
 
-        QDir().mkpath(base_dir);
+        // On construit le chemin manuellement à la racine de Roaming
+        QString base_dir = roaming + "/arrera-hub";
 
         config_folder = base_dir;
     #endif
