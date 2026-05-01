@@ -18,7 +18,11 @@ Hub::Hub(QString url, QObject *parent) : QObject(parent)
 
     #elif defined(Q_OS_WIN)
         config_init = true;
-        config_folder = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/arrera-hub";
+        QString base_dir= QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"\\arrera-hub";
+
+        QDir().mkpath(base_dir);
+
+        config_folder = base_dir;
     #endif
 
     if (config_init){
