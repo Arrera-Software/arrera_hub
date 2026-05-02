@@ -9,9 +9,38 @@ hub_gui::hub_gui(QWidget *parent)
 {
     ui->setupUi(this);
     theme.loadThemeFromJson(":/theme/asset/theme/theme_default.json");
+    about_view = false;
+
+    ui->arrera_hub->setCurrentWidget(ui->main);
 }
 
 hub_gui::~hub_gui()
 {
     delete ui;
 }
+
+void hub_gui::on_BTN_ICONE_clicked()
+{
+    if (!about_view) {
+        ui->arrera_hub->setCurrentWidget(ui->about);
+        about_view = true;
+    }
+    else {
+        ui->arrera_hub->setCurrentWidget(ui->main);
+        about_view = false;
+    }
+}
+
+
+void hub_gui::on_IDC_GITHUB_clicked()
+{
+    QUrl url("https://github.com/Arrera-Software/arrera_hub");
+    QDesktopServices::openUrl(url);
+}
+
+void hub_gui::on_ID_INTERNET_clicked()
+{
+    QUrl url("https://www.arrera-software.fr/");
+    QDesktopServices::openUrl(url);
+}
+
