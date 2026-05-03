@@ -110,7 +110,71 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="main"/>
+      <widget class="QWidget" name="main">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QFrame" name="frame">
+          <property name="frameShape">
+           <enum>QFrame::Shape::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Shadow::Raised</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="RoundedFrame" name="frame_2">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>75</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Shape::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Shadow::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="APushButton" name="BTN_SOFT_UPDATE">
+             <property name="text">
+              <string>Mise a jour</string>
+             </property>
+             <property name="icon">
+              <iconset resource="ressource.qrc">
+               <normaloff>:/gui/asset/icone/gui/update_soft.png</normaloff>:/gui/asset/icone/gui/update_soft.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="APushButton" name="BTN_SOFT_INSTALLED">
+             <property name="text">
+              <string>Logiciel installer</string>
+             </property>
+             <property name="icon">
+              <iconset resource="ressource.qrc">
+               <normaloff>:/gui/asset/icone/gui/install.png</normaloff>:/gui/asset/icone/gui/install.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="APushButton" name="BTN_UNINSTALL_SOFT">
+             <property name="text">
+              <string>Desinstaller</string>
+             </property>
+             <property name="icon">
+              <iconset resource="ressource.qrc">
+               <normaloff>:/gui/asset/icone/gui/uninstall.png</normaloff>:/gui/asset/icone/gui/uninstall.png</iconset>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="load_page">
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>

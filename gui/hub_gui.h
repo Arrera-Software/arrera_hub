@@ -32,6 +32,12 @@ private slots:
 
     void on_BTN_UPDATE_DEPOS_clicked();
 
+    void on_BTN_SOFT_UPDATE_clicked();
+
+    void on_BTN_SOFT_INSTALLED_clicked();
+
+    void on_BTN_UNINSTALL_SOFT_clicked();
+
 private:
     Ui::hub_gui *ui;
     Hub hub;

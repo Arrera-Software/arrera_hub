@@ -8,5 +8,8 @@
     </qresource>
     <qresource prefix="/gui">
         <file>asset/icone/gui/update.png</file>
+        <file>asset/icone/gui/install.png</file>
+        <file>asset/icone/gui/uninstall.png</file>
+        <file>asset/icone/gui/update_soft.png</file>
     </qresource>
 </RCC>
