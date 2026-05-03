@@ -11,7 +11,12 @@ hub_gui::hub_gui(QWidget *parent)
     theme.loadThemeFromJson(":/theme/asset/theme/theme_default.json");
     about_view = false;
 
-    ui->arrera_hub->setCurrentWidget(ui->main);
+    connect(&hub, &Hub::depotsUpdated, this, &hub_gui::on_depots_updated);
+
+    ui->arrera_hub->setCurrentWidget(ui->load_page);
+    page_load = true;
+
+    hub.update_depots();
 }
 
 hub_gui::~hub_gui()
@@ -21,13 +26,15 @@ hub_gui::~hub_gui()
 
 void hub_gui::on_BTN_ICONE_clicked()
 {
-    if (!about_view) {
-        ui->arrera_hub->setCurrentWidget(ui->about);
-        about_view = true;
-    }
-    else {
-        ui->arrera_hub->setCurrentWidget(ui->main);
-        about_view = false;
+    if (!page_load){
+        if (!about_view) {
+            ui->arrera_hub->setCurrentWidget(ui->about);
+            about_view = true;
+        }
+        else {
+            ui->arrera_hub->setCurrentWidget(ui->main);
+            about_view = false;
+        }
     }
 }
 
@@ -44,3 +51,12 @@ void hub_gui::on_ID_INTERNET_clicked()
     QDesktopServices::openUrl(url);
 }
 
+void hub_gui::on_depots_updated(bool succes){
+    if (succes){
+        QMessageBox::information(this,"Arrera Hub","Le dépôt Arrera Hub a bien été mis à jour");
+    }else{
+        QMessageBox::information(this,"Arrera Hub","Le dépôt Arrera Hub n'a pas été mis à jour");
+    }
+    page_load = false;
+    ui->arrera_hub->setCurrentWidget(ui->main);
+}

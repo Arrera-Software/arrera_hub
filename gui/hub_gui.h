@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QDesktopServices>
+#include <QMessageBox>
 #include "../core/hub.h"
 #include "arrera_qt/arrera_theme.h"
 
@@ -27,10 +28,12 @@ private slots:
 
     void on_ID_INTERNET_clicked();
 
+    void on_depots_updated(bool succes);
+
 private:
     Ui::hub_gui *ui;
     Hub hub;
     Arrera_Theme theme;
-    bool about_view;
+    bool about_view,page_load;
 };
 #endif // HUB_GUI_H
