@@ -16,7 +16,6 @@ hub_gui::hub_gui(QWidget *parent)
     ui->arrera_hub->setCurrentWidget(ui->load_page);
     ui->BTN_UPDATE_DEPOS->setVisible(false);
     page_load = true;
-
     hub.update_depots();
 }
 
@@ -56,6 +55,13 @@ void hub_gui::on_depots_updated(bool succes){
     ui->arrera_hub->setCurrentWidget(ui->main);
     ui->BTN_UPDATE_DEPOS->setVisible(true);
     if (succes){
+        QStringList list_soft;
+        for (QString soft : hub.get_soft_available()){
+            if (hub.get_url_img(soft) != ""){
+                list_soft.append(soft.toLower());
+            }
+        }
+
         QMessageBox::information(this,"Arrera Hub","Le dépôt Arrera Hub a bien été mis à jour");
     }else{
         QMessageBox::information(this,"Arrera Hub","Le dépôt Arrera Hub n'a pas été mis à jour");
