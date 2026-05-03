@@ -7,6 +7,9 @@
 #include "../core/hub.h"
 #include "arrera_qt/arrera_theme.h"
 
+#include "arrera_qt/roundedframe.h"
+#include "arrera_qt/apushbutton.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class hub_gui;
@@ -34,14 +37,12 @@ private slots:
 
     void on_BTN_SOFT_UPDATE_clicked();
 
-    void on_BTN_SOFT_INSTALLED_clicked();
-
-    void on_BTN_UNINSTALL_SOFT_clicked();
-
-private:
+private: // Atribut
     Ui::hub_gui *ui;
     Hub hub;
     Arrera_Theme theme;
     bool about_view,page_load;
+private : // Methode private
+    void set_view_install_soft(QStringList list_available,QStringList list_installed);
 };
 #endif // HUB_GUI_H

@@ -55,12 +55,14 @@ void hub_gui::on_depots_updated(bool succes){
     ui->arrera_hub->setCurrentWidget(ui->main);
     ui->BTN_UPDATE_DEPOS->setVisible(true);
     if (succes){
-        QStringList list_soft;
+        QStringList availabe;
         for (QString soft : hub.get_soft_available()){
             if (hub.get_url_img(soft) != ""){
-                list_soft.append(soft.toLower());
+                availabe.append(soft.toLower());
             }
         }
+
+        set_view_install_soft(availabe,hub.get_soft_installed());
 
         QMessageBox::information(this,"Arrera Hub","Le dépôt Arrera Hub a bien été mis à jour");
     }else{
@@ -83,15 +85,88 @@ void hub_gui::on_BTN_SOFT_UPDATE_clicked()
 
 }
 
+void hub_gui::set_view_install_soft(QStringList list_available,QStringList list_installed){
 
-void hub_gui::on_BTN_SOFT_INSTALLED_clicked()
-{
+    QLayout *layout = ui->install_soft->layout();
 
+    if (layout != nullptr) {
+        QLayoutItem *item;
+        while ((item = layout->takeAt(0)) != nullptr) {
+            if (item->widget()) {
+                delete item->widget();
+            }
+            delete item;
+        }
+        delete layout;
+    }
+
+    QVBoxLayout *layoutPrincipal = new QVBoxLayout(ui->install_soft);
+
+    QNetworkAccessManager *networkManager = new QNetworkAccessManager(this);
+
+    for (const QString &soft : list_available){
+        RoundedFrame *frame = new RoundedFrame();
+
+        frame->setFrameShape(QFrame::StyledPanel);
+        QHBoxLayout *frameLayout = new QHBoxLayout(frame);
+
+        QLabel *labelIcone = new QLabel();
+        labelIcone->setFixedSize(64, 64);
+        labelIcone->setAlignment(Qt::AlignCenter);
+        labelIcone->setText("...");
+
+        QLabel *labelNom = new QLabel(soft);
+        QFont font = labelNom->font();
+        font.setBold(true);
+        font.setPointSize(15);
+        labelNom->setFont(font);
+
+        APushButton *btnAction = new APushButton();
+        if (list_installed.contains(soft)){
+            btnAction->setText("Désinstaller");
+            btnAction->setIcon(QIcon(":/gui/asset/icone/gui/uninstall.png"));
+            connect(btnAction, &QPushButton::clicked, this, [this, soft]() {
+                cout << "Desistallation" << endl;
+            });
+        }else{
+            btnAction->setText("Installer");
+            btnAction->setIcon(QIcon(":/gui/asset/icone/gui/install.png"));
+            connect(btnAction, &QPushButton::clicked, this, [this, soft]() {
+                cout << "Installe" << endl;
+            });
+        }
+        btnAction->setIconSize(QSize(16, 16));
+
+        frameLayout->addWidget(labelIcone);
+        frameLayout->addWidget(labelNom);
+        frameLayout->addStretch();
+        frameLayout->addWidget(btnAction);
+
+        layoutPrincipal->addWidget(frame);
+
+        QString urlIcone = hub.get_url_img(soft);
+        if (urlIcone != "error" && !urlIcone.isEmpty()) {
+            QNetworkRequest request((QUrl(urlIcone)));
+            QNetworkReply *reply = networkManager->get(request);
+
+            connect(reply, &QNetworkReply::finished, this, [reply, labelIcone]() {
+                if (reply->error() == QNetworkReply::NoError) {
+                    QByteArray imageData = reply->readAll();
+                    QPixmap pixmap;
+                    if (pixmap.loadFromData(imageData)) {
+                        labelIcone->setPixmap(
+                            pixmap.scaled(64, 64,
+                                          Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                    }
+                } else {
+                    labelIcone->setText("Erreur\nImage");
+                }
+                reply->deleteLater();
+            });
+        } else {
+            labelIcone->setText("Pas\nd'icône");
+        }
+    }
+
+    layoutPrincipal->addStretch();
 }
-
-
-void hub_gui::on_BTN_UNINSTALL_SOFT_clicked()
-{
-
-}
-
