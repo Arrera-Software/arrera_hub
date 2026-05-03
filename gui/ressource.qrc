@@ -6,4 +6,7 @@
         <file>asset/icone/linux_win.png</file>
         <file>asset/icone/mac.png</file>
     </qresource>
+    <qresource prefix="/gui">
+        <file>asset/icone/gui/update.png</file>
+    </qresource>
 </RCC>

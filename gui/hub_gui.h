@@ -30,6 +30,8 @@ private slots:
 
     void on_depots_updated(bool succes);
 
+    void on_BTN_UPDATE_DEPOS_clicked();
+
 private:
     Ui::hub_gui *ui;
     Hub hub;
