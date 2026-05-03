@@ -113,13 +113,11 @@
       <widget class="QWidget" name="main">
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QFrame" name="frame">
-          <property name="frameShape">
-           <enum>QFrame::Shape::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Shadow::Raised</enum>
-          </property>
+         <widget class="QStackedWidget" name="SOFT_STACKED">
+          <widget class="QWidget" name="install_soft"/>
+          <widget class="QWidget" name="uninstall_soft"/>
+          <widget class="QWidget" name="update_soft"/>
+          <widget class="QWidget" name="installed_soft"/>
          </widget>
         </item>
         <item>
