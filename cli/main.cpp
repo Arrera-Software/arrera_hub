@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
 
     if (command == "help" || command == "-help") {
         cout << "Arrera Hub\n" <<
+                "- update_depots\n"<<
                 "- install\n" <<
                 "- uninstall\n" <<
                 "- installed\n" <<
@@ -33,6 +34,32 @@ int main(int argc, char *argv[])
                 "- check-update" << endl;
 
         return 0;
+    }
+    else if (command == "update_depots" || command == "-update_depots") {
+        cout << "Mise à jour des dépôts en cours..." << endl;
+
+        // 1. On crée une boucle d'événements locale
+        QEventLoop loop;
+        bool resultat_maj = false;
+
+        QObject::connect(&hub, &Hub::depotsUpdated, [&resultat_maj, &loop](bool success) {
+            resultat_maj = success;
+            loop.quit();
+        });
+
+        bool requete_lancee = hub.update_depots();
+
+        if (requete_lancee) {
+            loop.exec();
+
+            if (resultat_maj) {
+                cout << "[SUCCES] Les dépôts ont été mis à jour avec succès !" << endl;
+            } else {
+                cout << "[ERREUR] Le téléchargement des dépôts a échoué (problème réseau ou serveur)." << endl;
+            }
+        } else {
+            cout << "[ERREUR] Impossible de lancer la mise à jour (URL des dépôts invalide ou manquante)." << endl;
+        }
     }
     else if (command == "about" || command == "-about") {
         cout << "Arrera Hub by Arrera Software" << endl;
