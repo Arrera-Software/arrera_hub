@@ -115,27 +115,6 @@ bool Hub::update_depots()
     }
 }
 
-void Hub::check_software_update(QString soft){
-    get_dict_software(soft, [this, soft](QJsonObject dict) {
-
-        if (dict.isEmpty()) {
-            return;
-        }
-
-        QString version_depots = dict.value("version").toString();
-        QString version_local = read_valeur(soft);
-
-        if ((version_local == "error" || version_local == version_depots)) {
-            emit update_check(soft, false);
-        }else if (version_local == "none"){
-            emit update_check(soft,false);
-        } else {
-            emit update_check(soft, true);
-        }
-
-    });
-}
-
 void Hub::install_software(QString soft)
 {
     perform_installation(soft, [this](bool success) {
@@ -285,10 +264,6 @@ QStringList Hub::get_soft_with_update(){
     }
 
     return out;
-}
-
-void Hub::quit(){
-    emit finnish();
 }
 
 QString Hub::get_url_img(QString soft){

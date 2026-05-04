@@ -42,13 +42,13 @@ class Hub : public QObject
         // Methode pour l'URL IMG
         QString get_url_img(QString soft);
 
-    private:
-        // Atribut
+    private:// Atribut
         QString config_folder,config_file,depots_file;
         QString depots_url;
         QSettings* setting_file;
         bool depots_url_saved, setting_loaded,config_init = false,file_created = false;
-        // Methode
+
+    private : // Methode
         bool write_setting(const QString &key, const QString &value);
         QString read_valeur(const QString &key);
         void get_dict_software(QString soft, function<void(QJsonObject)> callback);
@@ -56,7 +56,7 @@ class Hub : public QObject
         QString get_data_from_depots(QString soft, QString data);
 
     signals:
-        void depots_updated(bool success);
+        void depotsUpdated(bool success);
         void app_installed(bool succes);
         void app_update(bool succes);
 };
