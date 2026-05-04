@@ -115,7 +115,7 @@
         <item>
          <widget class="QStackedWidget" name="SOFT_STACKED">
           <widget class="QWidget" name="install_soft"/>
-          <widget class="QWidget" name="u_soft"/>
+          <widget class="QWidget" name="update_soft"/>
          </widget>
         </item>
         <item>

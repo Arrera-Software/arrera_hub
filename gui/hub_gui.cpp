@@ -59,14 +59,20 @@ void hub_gui::on_depots_updated(bool succes){
     ui->arrera_hub->setCurrentWidget(ui->main);
     ui->BTN_UPDATE_DEPOS->setVisible(true);
     if (succes){
-        QStringList availabe;
+        QStringList availabe,update_soft;
+        QStringList list_soft_installed = hub.get_soft_installed();
         for (QString soft : hub.get_soft_available()){
             if (hub.get_url_img(soft) != ""){
                 availabe.append(soft.toLower());
             }
         }
 
-        set_view_install_soft(availabe,hub.get_soft_installed());
+        for (QString soft : hub.get_soft_with_update()){
+            update_soft.append(soft.toLower());
+        }
+
+        set_view_install_soft(availabe,list_soft_installed);
+        set_view_update_soft(update_soft);
 
         QMessageBox::information(this,"Arrera Hub","Le dépôt Arrera Hub a bien été mis à jour");
     }else{
@@ -87,7 +93,7 @@ void hub_gui::on_BTN_UPDATE_DEPOS_clicked()
 void hub_gui::on_BTN_SOFT_UPDATE_clicked()
 {
     if (!page_update){
-        ui->SOFT_STACKED->setCurrentWidget(ui->u_soft);
+        ui->SOFT_STACKED->setCurrentWidget(ui->update_soft);
         ui->BTN_SOFT_UPDATE->setText("Accueil");
         ui->BTN_SOFT_UPDATE->setIcon(QIcon(":/gui/asset/icone/gui/home.png"));
         page_update = true;
@@ -150,6 +156,101 @@ void hub_gui::set_view_install_soft(QStringList list_available,QStringList list_
             });
         }
         btnAction->setIconSize(QSize(16, 16));
+
+        frameLayout->addWidget(labelIcone);
+        frameLayout->addWidget(labelNom);
+        frameLayout->addStretch();
+        frameLayout->addWidget(btnAction);
+
+        layoutPrincipal->addWidget(frame);
+
+        QString urlIcone = hub.get_url_img(soft);
+        if (urlIcone != "error" && !urlIcone.isEmpty()) {
+            QNetworkRequest request((QUrl(urlIcone)));
+            QNetworkReply *reply = networkManager->get(request);
+
+            connect(reply, &QNetworkReply::finished, this, [reply, labelIcone]() {
+                if (reply->error() == QNetworkReply::NoError) {
+                    QByteArray imageData = reply->readAll();
+                    QPixmap pixmap;
+                    if (pixmap.loadFromData(imageData)) {
+                        labelIcone->setPixmap(
+                            pixmap.scaled(64, 64,
+                                          Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                    }
+                } else {
+                    labelIcone->setText("Erreur\nImage");
+                }
+                reply->deleteLater();
+            });
+        } else {
+            labelIcone->setText("Pas\nd'icône");
+        }
+    }
+
+    layoutPrincipal->addStretch();
+}
+
+void hub_gui::set_view_update_soft(QStringList list_to_update)
+{
+    QLayout *layout = ui->update_soft->layout();
+
+    if (layout != nullptr) {
+        QLayoutItem *item;
+        while ((item = layout->takeAt(0)) != nullptr) {
+            if (item->widget()) {
+                delete item->widget();
+            }
+            delete item;
+        }
+        delete layout;
+    }
+
+    QVBoxLayout *layoutPrincipal = new QVBoxLayout(ui->update_soft);
+
+    if (list_to_update.isEmpty()) {
+        // Création du label pour indiquer qu'il n'y a rien à mettre à jour
+        QLabel *labelNoUpdate = new QLabel("Aucune mise à jour disponible");
+        QFont font = labelNoUpdate->font();
+        font.setPointSize(16);
+        font.setBold(true);
+        labelNoUpdate->setFont(font);
+        labelNoUpdate->setAlignment(Qt::AlignCenter);
+
+        layoutPrincipal->addStretch();
+        layoutPrincipal->addWidget(labelNoUpdate);
+        layoutPrincipal->addStretch();
+
+        return;
+    }
+
+    QNetworkAccessManager *networkManager = new QNetworkAccessManager(this);
+
+    for (const QString &soft : list_to_update) {
+        RoundedFrame *frame = new RoundedFrame();
+        frame->setFrameShape(QFrame::StyledPanel);
+        QHBoxLayout *frameLayout = new QHBoxLayout(frame);
+
+        QLabel *labelIcone = new QLabel();
+        labelIcone->setFixedSize(64, 64);
+        labelIcone->setAlignment(Qt::AlignCenter);
+        labelIcone->setText("...");
+
+        QLabel *labelNom = new QLabel(soft);
+        QFont font = labelNom->font();
+        font.setBold(true);
+        font.setPointSize(15);
+        labelNom->setFont(font);
+
+        APushButton *btnAction = new APushButton();
+        btnAction->setText("Mettre à jour");
+
+        btnAction->setIcon(QIcon(":/gui/asset/icone/gui/update_soft.png"));
+
+        connect(btnAction, &QPushButton::clicked, this, [this, soft]() {
+            cout << "Lancement de la mise à jour pour : " << soft.toStdString() << endl;
+
+        });
 
         frameLayout->addWidget(labelIcone);
         frameLayout->addWidget(labelNom);

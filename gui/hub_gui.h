@@ -44,5 +44,6 @@ private: // Atribut
     bool about_view,page_load,page_update;
 private : // Methode private
     void set_view_install_soft(QStringList list_available,QStringList list_installed);
+    void set_view_update_soft(QStringList list_to_update);
 };
 #endif // HUB_GUI_H
