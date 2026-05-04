@@ -29,9 +29,6 @@ class Hub : public QObject
         // Gestion de depots
         bool update_depots();
 
-        // Mise a jour des logiel
-        void check_software_update(QString soft);
-
         //Installation et desinstallation des logiciel
         void install_software(QString soft);
         bool uninstall_software(QString soft);
@@ -40,9 +37,7 @@ class Hub : public QObject
         // Methode pour avoir sur les logicel
         QStringList get_soft_available();
         QStringList get_soft_installed();
-
-        // Methode utilitaire
-        void quit();
+        QStringList get_soft_with_update();
 
         // Methode pour l'URL IMG
         QString get_url_img(QString soft);
@@ -58,13 +53,10 @@ class Hub : public QObject
         QString read_valeur(const QString &key);
         void get_dict_software(QString soft, function<void(QJsonObject)> callback);
         void perform_installation(const QString& soft, std::function<void(bool)> callback);
+        QString get_data_from_depots(QString soft, QString data);
 
     signals:
-        void depotsUpdated(bool success);
-        void update_check(QString soft,bool update);
-        void finnish();
-
-        // Download
+        void depots_updated(bool success);
         void app_installed(bool succes);
         void app_update(bool succes);
 };

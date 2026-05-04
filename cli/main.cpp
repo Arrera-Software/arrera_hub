@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
                 "- about\n" <<
                 "- available\n" <<
                 "- update\n" <<
-                "- check-update" << endl;
+                "- available_updates" << endl;
 
         return 0;
     }
@@ -122,75 +122,48 @@ int main(int argc, char *argv[])
 
         return 0;
     }
-    else if (command == "check-update" || command == "-check-update") {
-        QStringList installedApps = hub.get_soft_installed();
+    else if (command == "available_updates" || command == "-available_updates") {
+        QStringList soft = hub.get_soft_with_update();
 
-        if (installedApps.isEmpty()) {
-            cout << "Aucune application installee a verifier." << endl;
-            return 0;
-        }
-
-        cout << "Verification des mises a jour en cours..." << endl;
-
-        for (const QString &soft : installedApps) {
-            QEventLoop loop;
-            QObject::connect(&hub, &Hub::update_check, [&](QString softName, bool updateNeeded) {
-                if (updateNeeded) {
-                    cout << "[MAJ DISPONIBLE] : " << softName.toStdString() << endl;
-                } else {
-                    cout << "[A JOUR]         : " << softName.toStdString() << endl;
-                }
-                loop.quit();
-            });
-
-            hub.check_software_update(soft);
-            loop.exec();
+        if (soft.isEmpty()){
+            cout << "Tous les logiciels Arrera sont à jour" << endl;
+        }else {
+            cout << "Liste des mises à jour à faire\n" ;
+            for (QString s : soft){
+                cout << "- " << s.toStdString() << "\n";
+            }
+            cout << endl;
         }
 
         return 0;
     }
     else if (command == "update" || command == "-update") {
-        QStringList installedApps = hub.get_soft_installed();
+        // On utilise la nouvelle méthode pour ne cibler que les applications obsolètes
+        QStringList appsToUpdate = hub.get_soft_with_update();
 
-        if (installedApps.isEmpty()) {
-            cout << "Aucune application installee a mettre a jour." << endl;
+        if (appsToUpdate.isEmpty()) {
+            cout << "Toutes les applications installees sont deja a jour." << endl;
             return 0;
         }
 
         cout << "Recherche et application des mises a jour..." << endl;
 
-        for (const QString &soft : installedApps) {
-            bool needsUpdate = false;
+        for (const QString &soft : appsToUpdate) {
+            cout << "\nLancement de la mise a jour pour " << soft.toStdString() << "..." << endl;
 
-            // 1. Vérifier si l'application a besoin d'une mise à jour
-            QEventLoop checkLoop;
-            QObject::connect(&hub, &Hub::update_check, [&](QString softName, bool updateNeeded) {
-                needsUpdate = updateNeeded;
-                checkLoop.quit();
+            QEventLoop updateLoop;
+            QObject::connect(&hub, &Hub::app_update, [&](bool success) {
+                if (success) {
+                    cout << "-> Mise a jour de " << soft.toStdString() << " reussie." << endl;
+                } else {
+                    cout << "-> Echec de la mise a jour de " << soft.toStdString() << "." << endl;
+                }
+                updateLoop.quit();
             });
 
-            hub.check_software_update(soft);
-            checkLoop.exec();
-
-            // 2. Si une mise à jour est requise, on la lance
-            if (needsUpdate) {
-                cout << "\nLancement de la mise a jour pour " << soft.toStdString() << "..." << endl;
-
-                QEventLoop updateLoop;
-                QObject::connect(&hub, &Hub::app_update, [&](bool success) {
-                    if (success) {
-                        cout << "-> Mise a jour de " << soft.toStdString() << " reussie." << endl;
-                    } else {
-                        cout << "-> Echec de la mise a jour de " << soft.toStdString() << "." << endl;
-                    }
-                    updateLoop.quit();
-                });
-
-                hub.update_software(soft);
-                updateLoop.exec();
-            }
+            hub.update_software(soft);
+            updateLoop.exec();
         }
-
         cout << "\nProcessus de mise a jour termine." << endl;
         return 0;
     }

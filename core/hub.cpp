@@ -180,31 +180,29 @@ bool Hub::uninstall_software(QString soft)
 
 void Hub::update_software(QString soft)
 {
-    get_dict_software(soft, [this, soft](QJsonObject dict) {
+    QString version_depots = get_data_from_depots(soft, "version");
+    QString version_local = read_valeur(soft);
+    QString emplacement = read_valeur(soft + "_install");
 
-        if (dict.isEmpty()) {
-            emit app_update(false);
-        }
+    if (version_depots == "error" || version_local == "error" || version_local == "none" || version_local == version_depots) {
+        emit app_update(false);
+        return;
+    }
 
-        QString version_depots = dict.value("version").toString();
-        QString emplacement = read_valeur(soft+"_install");
-        QString version_local = read_valeur(soft);
+    QDir application(emplacement);
+    if (application.exists()) {
+        if (application.removeRecursively()) {
 
-        if ((version_local == "error" || version_local == version_depots)) {
-            emit app_update(false);
-        }else if (version_local == "none"){
-            emit app_update(false);
+            perform_installation(soft, [this](bool success) {
+                emit app_update(success);
+            });
+
         } else {
-            QDir application(emplacement);
-            if (application.exists()) {
-                    if (application.removeRecursively()) {
-                        perform_installation(soft, [this](bool success) {
-                            emit app_update(success);
-                        });
-                    }else emit app_update(false);
-            }else emit app_update(false);
+            emit app_update(false);
         }
-    });
+    } else {
+        emit app_update(false);
+    }
 }
 
 
@@ -273,50 +271,28 @@ QStringList Hub::get_soft_installed()
     return out;
 }
 
+QStringList Hub::get_soft_with_update(){
+    QStringList out;
+
+    QStringList soft_installed = get_soft_installed();
+
+    for (QString soft : soft_installed){
+        QString local = read_valeur(soft);
+        QString oneline = get_data_from_depots(soft, "version");
+        if (oneline != "error" && oneline != ""){
+            if (!(local == oneline)) out.append(soft);
+        }
+    }
+
+    return out;
+}
+
 void Hub::quit(){
     emit finnish();
 }
 
 QString Hub::get_url_img(QString soft){
-    QFile file(config_folder + "/depots.json");
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        cout << "fichier non ouvert " << depots_file.toStdString() << endl;
-        return "error";
-    }
-
-    QByteArray data = file.readAll();
-    file.close();
-
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-    if (error.error != QJsonParseError::NoError) {
-        cout << "Erreur pars " << endl;
-        return "error";
-    }
-
-    if (doc.isObject()) {
-        QJsonObject root = doc.object();
-
-        for (const QString& key : root.keys()) {
-            QJsonValue val = root.value(key);
-
-            if (val.isArray()) {
-                QJsonArray array = val.toArray();
-                for (const QJsonValue& item : array) {
-                    if (item.isObject()) {
-                        QJsonObject obj = item.toObject();
-                        if (obj.value("name").toString().compare(
-                                soft, Qt::CaseInsensitive) == 0) {
-                            return obj.value("img").toString();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return "error";
+    return get_data_from_depots(soft, "img");
 }
 
 // Methode private
@@ -429,10 +405,10 @@ void Hub::perform_installation(const QString& soft, std::function<void(bool)> ca
         }
 
         QString url_download = dict.value("download_linux").toString();
-        QString version = dict.value("version").toString();
+        QString version = get_data_from_depots(soft,"version");
         if (url_download.isEmpty() || version.isEmpty()) {
             if (callback) callback(false);
-            return; // Ajout d'un return essentiel pour éviter un crash
+            return;
         }
 
         QUrl url(url_download);
@@ -574,7 +550,7 @@ void Hub::perform_installation(const QString& soft, std::function<void(bool)> ca
 
     get_dict_software(soft, [this, soft, callback](QJsonObject dict) {
         QString url_download = dict.value("download_macos").toString();
-        QString version = dict.value("version").toString();
+        QString version = get_data_from_depots(soft,"version");
 
         if (url_download.isEmpty()) {
             if (callback) callback(false);
@@ -701,7 +677,7 @@ void Hub::perform_installation(const QString& soft, std::function<void(bool)> ca
         }
 
         QString url_download = dict.value("download_windows").toString();
-        QString version = dict.value("version").toString();
+        QString version = get_data_from_depots(soft,"version");
         if (url_download.isEmpty() || version.isEmpty()) {
             if (callback) callback(false);
             return; // Ajout d'un return essentiel
@@ -797,4 +773,50 @@ void Hub::perform_installation(const QString& soft, std::function<void(bool)> ca
         });
     });
 #endif
+}
+
+QString Hub::get_data_from_depots(QString soft, QString data){
+    QFile file(config_folder + "/depots.json");
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        cout << "fichier non ouvert " << depots_file.toStdString() << endl;
+        return "error";
+    }
+
+    QByteArray jsonData = file.readAll();
+    file.close();
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData, &error);
+    if (error.error != QJsonParseError::NoError) {
+        return "error";
+    }
+
+    if (doc.isObject()) {
+        QJsonObject root = doc.object();
+
+        for (const QString& key : root.keys()) {
+            QJsonValue val = root.value(key);
+
+            if (val.isArray()) {
+                QJsonArray array = val.toArray();
+                for (const QJsonValue& item : array) {
+                    if (item.isObject()) {
+                        QJsonObject obj = item.toObject();
+                        if (obj.value("name").toString().compare(soft, Qt::CaseInsensitive) == 0) {
+
+                            if (obj.contains(data)) {
+                                return obj.value(data).toString();
+                            } else {
+                                return "error";
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return "error";
 }
