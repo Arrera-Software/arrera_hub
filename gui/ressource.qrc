@@ -11,5 +11,6 @@
         <file>asset/icone/gui/install.png</file>
         <file>asset/icone/gui/uninstall.png</file>
         <file>asset/icone/gui/update_soft.png</file>
+        <file>asset/icone/gui/home.png</file>
     </qresource>
 </RCC>

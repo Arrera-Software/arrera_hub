@@ -16,7 +16,11 @@ hub_gui::hub_gui(QWidget *parent)
     ui->arrera_hub->setCurrentWidget(ui->load_page);
     ui->BTN_UPDATE_DEPOS->setVisible(false);
     page_load = true;
+    page_update = false;
     hub.update_depots();
+
+    ui->BTN_SOFT_UPDATE->setText("Mise a jour");
+    ui->BTN_SOFT_UPDATE->setIcon(QIcon(":/gui/asset/icone/gui/update_soft.png"));
 }
 
 hub_gui::~hub_gui()
@@ -82,7 +86,17 @@ void hub_gui::on_BTN_UPDATE_DEPOS_clicked()
 
 void hub_gui::on_BTN_SOFT_UPDATE_clicked()
 {
-
+    if (!page_update){
+        ui->SOFT_STACKED->setCurrentWidget(ui->u_soft);
+        ui->BTN_SOFT_UPDATE->setText("Accueil");
+        ui->BTN_SOFT_UPDATE->setIcon(QIcon(":/gui/asset/icone/gui/home.png"));
+        page_update = true;
+    }else {
+        ui->SOFT_STACKED->setCurrentWidget(ui->install_soft);
+        ui->BTN_SOFT_UPDATE->setText("Mise a jour");
+        ui->BTN_SOFT_UPDATE->setIcon(QIcon(":/gui/asset/icone/gui/update_soft.png"));
+        page_update = false;
+    }
 }
 
 void hub_gui::set_view_install_soft(QStringList list_available,QStringList list_installed){

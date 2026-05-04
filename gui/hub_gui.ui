@@ -115,19 +115,13 @@
         <item>
          <widget class="QStackedWidget" name="SOFT_STACKED">
           <widget class="QWidget" name="install_soft"/>
-          <widget class="QWidget" name="uninstall_soft"/>
-          <widget class="QWidget" name="update_soft"/>
-          <widget class="QWidget" name="installed_soft"/>
+          <widget class="QWidget" name="u_soft"/>
          </widget>
         </item>
         <item>
          <widget class="APushButton" name="BTN_SOFT_UPDATE">
           <property name="text">
            <string>Mise a jour</string>
-          </property>
-          <property name="icon">
-           <iconset resource="ressource.qrc">
-            <normaloff>:/gui/asset/icone/gui/update_soft.png</normaloff>:/gui/asset/icone/gui/update_soft.png</iconset>
           </property>
          </widget>
         </item>
