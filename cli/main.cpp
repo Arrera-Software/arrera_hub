@@ -23,15 +23,15 @@ int main(int argc, char *argv[])
 
     if (command == "help" || command == "-help") {
         cout << "Arrera Hub\n" <<
-                "- update_depots\n"<<
-                "- install\n" <<
-                "- uninstall\n" <<
-                "- installed\n" <<
-                "- help \n" <<
-                "- about\n" <<
-                "- available\n" <<
-                "- update\n" <<
-                "- available_updates" << endl;
+                "- update_depots : Mise à jour du dépôt d'Arrera Hub"<<
+                "- install {soft} : Installation du logiciel Arrera écrit à la place de {soft}\n" <<
+                "- uninstall {soft} : Désinstallation du logiciel Arrera écrit à la place de {soft}\n" <<
+                "- installed : Montre la liste des logiciels Arrera installés sur l'ordinateur avec Arrera Hub\n" <<
+                "- help : Montre toutes les commandes possibles d'Arrera Hub\n" <<
+                "- about : Vue à propos de l'application en ligne de commande Arrera Hub\n" <<
+                "- available : Liste les logiciels disponibles à l'installation avec Arrera Hub\n" <<
+                "- update {soft} : Met à jour le logiciel écrit à la place de {soft}\n" <<
+                "- available_updates : Liste les applications Arrera qui ont besoin d'une mise à jour" << endl;
 
         return 0;
     }
@@ -128,9 +128,9 @@ int main(int argc, char *argv[])
         if (soft.isEmpty()){
             cout << "Tous les logiciels Arrera sont à jour" << endl;
         }else {
-            cout << "Liste des mises à jour à faire\n" ;
+            cout << "Liste des mises à jour à faire :" ;
             for (QString s : soft){
-                cout << "- " << s.toStdString() << "\n";
+                cout << "\n- " << s.toStdString();
             }
             cout << endl;
         }
@@ -166,6 +166,18 @@ int main(int argc, char *argv[])
         }
         cout << "\nProcessus de mise a jour termine." << endl;
         return 0;
+    }else if (command == "available" || command == "-available"){
+        QStringList soft = hub.get_soft_available();
+
+        if (soft.isEmpty()){
+            cout << "Aucun logiciel disponible" << endl;
+        }else{
+            cout << "Logiciels disponibles :";
+            for (QString s : soft){
+                cout << "\n- " << s.toStdString() ;
+            }
+            cout << endl;
+        }
     }
     else {
         cout << "Commande non reconnue. Utilisez 'help' pour voir la liste des commandes." << endl;

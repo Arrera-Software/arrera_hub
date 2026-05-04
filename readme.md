@@ -2,10 +2,12 @@
 
 # Commande 
 
-- help : Aide 
-- about : A  propos 
-- install : installation d'une application Arrera mettre le nom d'une application arrera derierer 
-- uninstall : désinstallation d'une application Arrera mettre le nom d'une application arrera derierer
-- installed : Voir les application installer 
-- check-update : Verrifier si des application doive etre mis a jour 
-- update : Met a jour tout les application qui doive etre mis a jour
+- update_depots : Mise à jour du dépôt d'Arrera Hub
+- install {soft} : Installation du logiciel Arrera écrit à la place de {soft} 
+- uninstall {soft} : Désinstallation du logiciel Arrera écrit à la place de {soft} 
+- installed : Montre la liste des logiciels Arrera installés sur l'ordinateur avec Arrera Hub 
+- help : Montre toutes les commandes possibles d'Arrera Hub 
+- about : Vue à propos de l'application en ligne de commande Arrera Hub 
+- available : Liste les logiciels disponibles à l'installation avec Arrera Hub 
+- update {soft} : Met à jour le logiciel écrit à la place de {soft} 
+- available_updates : Liste les applications Arrera qui ont besoin d'une mise à jour"
