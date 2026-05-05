@@ -34,6 +34,8 @@ class Hub : public QObject
         void uninstall_software(QString soft);
         void update_software(QString soft);
 
+        void check_connection_status();
+
         // Methode pour avoir sur les logicel
         QStringList get_soft_available();
         QStringList get_soft_installed();
@@ -60,4 +62,5 @@ class Hub : public QObject
         void app_installed(bool succes);
         void app_update(bool succes);
         void app_uninstall(bool sucess);
+        void connection_status(bool is_online);
 };

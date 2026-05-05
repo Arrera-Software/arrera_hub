@@ -795,3 +795,32 @@ QString Hub::get_data_from_depots(QString soft, QString data){
 
     return "error";
 }
+
+
+void Hub::check_connection_status()
+{
+    if (depots_url.isEmpty() || !depots_url_saved) {
+        emit connection_status(false);
+        return;
+    }
+
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    QNetworkRequest request((QUrl(depots_url)));
+
+    // Une requête HEAD est beaucoup plus légère qu'un GET pour juste tester la présence du fichier
+    QNetworkReply *reply = manager->head(request);
+
+    QObject::connect(reply, &QNetworkReply::finished, [this, manager, reply]() {
+        bool is_online = false;
+
+        // Si aucune erreur, le dépôt est joignable et le fichier existe
+        if (reply->error() == QNetworkReply::NoError) {
+            is_online = true;
+        }
+
+        emit connection_status(is_online);
+
+        reply->deleteLater();
+        manager->deleteLater();
+    });
+}
