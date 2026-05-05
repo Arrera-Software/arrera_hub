@@ -53,7 +53,7 @@ private: // Atribut
     Ui::hub_gui *ui;
     Hub hub;
     Arrera_Theme theme;
-    bool about_view,page_load,page_update;
+    bool about_view,page_load,page_update,is_online;
 private : // Methode private
     void set_view_install_soft(QStringList list_available,QStringList list_installed);
     void set_view_update_soft(QStringList list_to_update);

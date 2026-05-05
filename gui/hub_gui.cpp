@@ -11,16 +11,23 @@ hub_gui::hub_gui(QWidget *parent)
     theme.loadThemeFromJson(":/theme/asset/theme/theme_default.json");
     about_view = false;
 
+    connect(&hub,&Hub::connection_status,this,[this](bool out){
+        is_online = out;
+    });
     connect(&hub, &Hub::depotsUpdated, this, &hub_gui::on_depots_updated);
     connect(&hub,&Hub::app_installed,this,&hub_gui::on_application_installed);
     connect(&hub,&Hub::app_uninstall,this,&hub_gui::on_application_uninstalled);
     connect(&hub,&Hub::app_update,this,&hub_gui::on_application_updated);
+
+
+    hub.check_connection_status();
 
     ui->arrera_hub->setCurrentWidget(ui->load_page);
     ui->L_PAGE_LOAD->setText("Mise à jour des dépôts");
     ui->BTN_UPDATE_DEPOS->setVisible(false);
     page_load = true;
     page_update = false;
+
     hub.update_depots();
 
     ui->BTN_SOFT_UPDATE->setText("Mise a jour");
@@ -60,35 +67,39 @@ void hub_gui::on_ID_INTERNET_clicked()
 }
 
 void hub_gui::on_depots_updated(bool succes){
-    ui->arrera_hub->setCurrentWidget(ui->main);
-    ui->BTN_UPDATE_DEPOS->setVisible(true);
-    if (succes){
-        QStringList availabe,update_soft;
-        QStringList list_soft_installed = hub.get_soft_installed();
-        for (QString soft : hub.get_soft_available()){
-            if (hub.get_url_img(soft) != ""){
-                availabe.append(soft.toLower());
+    if (is_online){
+        ui->arrera_hub->setCurrentWidget(ui->main);
+        if (succes){
+            QStringList availabe,update_soft;
+            QStringList list_soft_installed = hub.get_soft_installed();
+            for (QString soft : hub.get_soft_available()){
+                if (hub.get_url_img(soft) != ""){
+                    availabe.append(soft.toLower());
+                }
             }
+
+            for (QString soft : hub.get_soft_with_update()){
+                update_soft.append(soft.toLower());
+            }
+
+            set_view_install_soft(availabe,list_soft_installed);
+            set_view_update_soft(update_soft);
+
+            QMessageBox::information(this,"Arrera Hub","Le dépôt Arrera Hub a bien été mis à jour");
+        }else{
+            QMessageBox::information(this,"Arrera Hub","Le dépôt Arrera Hub n'a pas été mis à jour");
         }
+        page_load = false;
+        ui->SOFT_STACKED->setCurrentWidget(ui->install_soft);
 
-        for (QString soft : hub.get_soft_with_update()){
-            update_soft.append(soft.toLower());
-        }
-
-        set_view_install_soft(availabe,list_soft_installed);
-        set_view_update_soft(update_soft);
-
-        QMessageBox::information(this,"Arrera Hub","Le dépôt Arrera Hub a bien été mis à jour");
-    }else{
-        QMessageBox::information(this,"Arrera Hub","Le dépôt Arrera Hub n'a pas été mis à jour");
+        ui->SOFT_STACKED->setCurrentWidget(ui->install_soft);
+        ui->BTN_SOFT_UPDATE->setText("Mise a jour");
+        ui->BTN_SOFT_UPDATE->setIcon(QIcon(":/gui/asset/icone/gui/update_soft.png"));
+        page_update = false;
+    }else {
+        ui->arrera_hub->setCurrentWidget(ui->no_network);
     }
-    page_load = false;
-    ui->SOFT_STACKED->setCurrentWidget(ui->install_soft);
-
-    ui->SOFT_STACKED->setCurrentWidget(ui->install_soft);
-    ui->BTN_SOFT_UPDATE->setText("Mise a jour");
-    ui->BTN_SOFT_UPDATE->setIcon(QIcon(":/gui/asset/icone/gui/update_soft.png"));
-    page_update = false;
+    ui->BTN_UPDATE_DEPOS->setVisible(true);
 }
 
 void hub_gui::on_application_installed(bool succes)
@@ -129,6 +140,7 @@ void hub_gui::on_application_uninstalled(bool succes)
 
 void hub_gui::on_BTN_UPDATE_DEPOS_clicked()
 {
+    hub.check_connection_status();
     ui->arrera_hub->setCurrentWidget(ui->load_page);
     ui->L_PAGE_LOAD->setText("Mise à jour des dépôts");
     ui->BTN_UPDATE_DEPOS->setVisible(false);
