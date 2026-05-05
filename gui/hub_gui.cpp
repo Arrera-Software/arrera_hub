@@ -105,6 +105,21 @@ void hub_gui::on_BTN_SOFT_UPDATE_clicked()
     }
 }
 
+void hub_gui::on_install_application(QString soft)
+{
+
+}
+
+void hub_gui::on_uninstall_application(QString soft)
+{
+
+}
+
+void hub_gui::on_update_application(QString soft)
+{
+
+}
+
 void hub_gui::set_view_install_soft(QStringList list_available,QStringList list_installed){
 
     QLayout *layout = ui->install_soft->layout();
@@ -249,7 +264,6 @@ void hub_gui::set_view_update_soft(QStringList list_to_update)
 
         connect(btnAction, &QPushButton::clicked, this, [this, soft]() {
             cout << "Lancement de la mise à jour pour : " << soft.toStdString() << endl;
-
         });
 
         frameLayout->addWidget(labelIcone);

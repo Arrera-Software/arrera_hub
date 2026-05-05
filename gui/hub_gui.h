@@ -37,6 +37,12 @@ private slots:
 
     void on_BTN_SOFT_UPDATE_clicked();
 
+    void on_install_application(QString soft);
+
+    void on_uninstall_application(QString soft);
+
+    void on_update_application(QString soft);
+
 private: // Atribut
     Ui::hub_gui *ui;
     Hub hub;
