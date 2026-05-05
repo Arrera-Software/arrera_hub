@@ -122,12 +122,12 @@ void Hub::install_software(QString soft)
     });
 }
 
-bool Hub::uninstall_software(QString soft)
+void Hub::uninstall_software(QString soft)
 {
     QString version = read_valeur(soft);
     QString emplacement = read_valeur(soft+"_install");
 
-    if (version == "none" && emplacement == "none") return false;
+    if (version == "none" && emplacement == "none") emit app_uninstall(false);
     else {
         QDir application(emplacement);
 
@@ -140,7 +140,7 @@ bool Hub::uninstall_software(QString soft)
                 if (QFile::exists(desktopPath)){
                     QFile::remove(desktopPath);
                 }
-                return true;
+                emit app_uninstall(true);
                 #elif defined(Q_OS_WIN)
                 QString startMenuPath = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
                 QString shortcutPath = QDir(startMenuPath).filePath(soft + ".lnk");
@@ -148,12 +148,12 @@ bool Hub::uninstall_software(QString soft)
                 if (QFile::exists(shortcutPath)){
                     QFile::remove(shortcutPath);
                 }
-                return true;
+                emit app_uninstall(true);
                 #elif defined(Q_OS_MAC)
-                return true;
+                emit app_uninstall(true);
                 #endif
-            }else return false;
-        } else return false;
+            }else emit app_uninstall(false);
+        } else emit app_uninstall(false);
     }
 }
 

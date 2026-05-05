@@ -97,16 +97,28 @@ int main(int argc, char *argv[])
         }
         QString appName = args[2];
 
-        // uninstall_software est synchrone et retourne directement un booléen
-        bool success = hub.uninstall_software(appName);
+        QEventLoop loop;
+        bool operationSuccess = false;
 
-        if (success) {
-            cout << "Desinstallation de " << appName.toStdString() << " reussie." << endl;
-        } else {
-            cout << "Erreur lors de la desinstallation ou logiciel introuvable." << endl;
-        }
+        QObject::connect(&hub, &Hub::app_uninstall, [&loop, &operationSuccess, appName](bool success) {
+            operationSuccess = success;
 
-        return 0;
+            if (success) {
+                cout << "Desinstallation de " << appName.toStdString() << " reussie." << endl;
+            } else {
+                cout << "Erreur lors de la desinstallation ou logiciel introuvable." << endl;
+            }
+
+            loop.quit();
+        });
+
+        QTimer::singleShot(0, [&hub, appName]() {
+            hub.uninstall_software(appName);
+        });
+
+        loop.exec();
+
+        return operationSuccess ? 0 : 1;
     }
     else if (command == "installed" || command == "-installed") {
         QStringList installedApps = hub.get_soft_installed();

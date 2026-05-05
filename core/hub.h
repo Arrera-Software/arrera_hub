@@ -31,7 +31,7 @@ class Hub : public QObject
 
         //Installation et desinstallation des logiciel
         void install_software(QString soft);
-        bool uninstall_software(QString soft);
+        void uninstall_software(QString soft);
         void update_software(QString soft);
 
         // Methode pour avoir sur les logicel
@@ -59,4 +59,5 @@ class Hub : public QObject
         void depotsUpdated(bool success);
         void app_installed(bool succes);
         void app_update(bool succes);
+        void app_uninstall(bool sucess);
 };
