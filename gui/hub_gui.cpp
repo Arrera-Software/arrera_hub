@@ -80,8 +80,46 @@ void hub_gui::on_depots_updated(bool succes){
         QMessageBox::information(this,"Arrera Hub","Le dépôt Arrera Hub n'a pas été mis à jour");
     }
     page_load = false;
+    ui->SOFT_STACKED->setCurrentWidget(ui->install_soft);
 
 }
+
+void hub_gui::on_application_installed(bool succes)
+{
+    ui->arrera_hub->setCurrentWidget(ui->main);
+    if (succes){
+        QMessageBox::information(this,"Arrera Hub","Application installée");
+    }else {
+        QMessageBox::information(this,"Arrera Hub","L'application n'a pas pu être installée");
+    }
+    page_load = false;
+    on_BTN_UPDATE_DEPOS_clicked();
+}
+
+void hub_gui::on_application_updated(bool succes)
+{
+    ui->arrera_hub->setCurrentWidget(ui->main);
+    if (succes){
+        QMessageBox::information(this,"Arrera Hub","Application désinstallée");
+    }else {
+        QMessageBox::information(this,"Arrera Hub","L'application n'a pas pu être désinstallée");
+    }
+    page_load = false;
+    on_BTN_UPDATE_DEPOS_clicked();
+}
+
+void hub_gui::on_application_uninstalled(bool succes)
+{
+    ui->arrera_hub->setCurrentWidget(ui->main);
+    if (succes){
+        QMessageBox::information(this,"Arrera Hub","L'application a bien été mise à jour");
+    }else {
+        QMessageBox::information(this,"Arrera Hub","L'application n'a pas pu être mise à jour");
+    }
+    page_load = false;
+    on_BTN_UPDATE_DEPOS_clicked();
+}
+
 void hub_gui::on_BTN_UPDATE_DEPOS_clicked()
 {
     ui->arrera_hub->setCurrentWidget(ui->load_page);

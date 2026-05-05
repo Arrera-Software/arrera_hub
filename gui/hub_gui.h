@@ -33,6 +33,12 @@ private slots:
 
     void on_depots_updated(bool succes);
 
+    void on_application_installed(bool succes);
+
+    void on_application_updated(bool succes);
+
+    void on_application_uninstalled(bool succes);
+
     void on_BTN_UPDATE_DEPOS_clicked();
 
     void on_BTN_SOFT_UPDATE_clicked();
