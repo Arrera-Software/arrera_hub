@@ -1,5 +1,7 @@
 TEMPLATE = app
 
+TARGET = ahub
+
 QT -= gui
 QT += core network 
 
