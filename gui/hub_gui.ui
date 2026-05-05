@@ -108,7 +108,7 @@
     <item>
      <widget class="QStackedWidget" name="arrera_hub">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="main">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -130,7 +130,7 @@
       <widget class="QWidget" name="load_page">
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="L_PAGE_LOAD">
           <property name="font">
            <font>
             <pointsize>30</pointsize>

@@ -14,6 +14,7 @@ hub_gui::hub_gui(QWidget *parent)
     connect(&hub, &Hub::depotsUpdated, this, &hub_gui::on_depots_updated);
 
     ui->arrera_hub->setCurrentWidget(ui->load_page);
+    ui->L_PAGE_LOAD->setText("Mise à jour des dépôts");
     ui->BTN_UPDATE_DEPOS->setVisible(false);
     page_load = true;
     page_update = false;
@@ -84,6 +85,7 @@ void hub_gui::on_depots_updated(bool succes){
 void hub_gui::on_BTN_UPDATE_DEPOS_clicked()
 {
     ui->arrera_hub->setCurrentWidget(ui->load_page);
+    ui->L_PAGE_LOAD->setText("Mise à jour des dépôts");
     ui->BTN_UPDATE_DEPOS->setVisible(false);
     page_load = true;
     hub.update_depots();
@@ -107,17 +109,26 @@ void hub_gui::on_BTN_SOFT_UPDATE_clicked()
 
 void hub_gui::on_install_application(QString soft)
 {
-
+    page_load = true;
+    ui->arrera_hub->setCurrentWidget(ui->load_page);
+    ui->L_PAGE_LOAD->setText("Installationde "+soft+" ...");
+    hub.install_software(soft);
 }
 
 void hub_gui::on_uninstall_application(QString soft)
 {
-
+    page_load = true;
+    ui->arrera_hub->setCurrentWidget(ui->load_page);
+    ui->L_PAGE_LOAD->setText("Désinstallation de "+soft+" ...");
+    hub.install_software(soft);
 }
 
 void hub_gui::on_update_application(QString soft)
 {
-
+    page_load = true;
+    ui->arrera_hub->setCurrentWidget(ui->load_page);
+    ui->L_PAGE_LOAD->setText("Mise à jour de "+soft+" ...");
+    hub.install_software(soft);
 }
 
 void hub_gui::set_view_install_soft(QStringList list_available,QStringList list_installed){
