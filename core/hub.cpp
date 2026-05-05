@@ -144,7 +144,6 @@ void Hub::uninstall_software(QString soft)
                 #elif defined(Q_OS_WIN)
                 QString startMenuPath = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
                 QString shortcutPath = QDir(startMenuPath).filePath(soft + ".lnk");
-                cout << shortcutPath.toStdString();
                 if (QFile::exists(shortcutPath)){
                     QFile::remove(shortcutPath);
                 }
