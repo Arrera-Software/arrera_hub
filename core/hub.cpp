@@ -363,6 +363,7 @@ bool Hub::write_setting(const QString &key, const QString &value)
 QString Hub::read_valeur(const QString &key){
     if (!setting_loaded) return "error";
     if (key.isEmpty()) return "error";
+    setting_file->sync();
     setting_file->beginGroup("software");
     QString val = setting_file->value(key, "error").toString();
     setting_file->endGroup();
