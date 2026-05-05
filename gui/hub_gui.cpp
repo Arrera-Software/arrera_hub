@@ -156,7 +156,7 @@ void hub_gui::on_install_application(QString soft)
 {
     page_load = true;
     ui->arrera_hub->setCurrentWidget(ui->load_page);
-    ui->L_PAGE_LOAD->setText("Installationde "+soft+" ...");
+    ui->L_PAGE_LOAD->setText("Installation de "+soft+" ...");
     hub.install_software(soft);
 }
 
