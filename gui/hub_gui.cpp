@@ -12,6 +12,9 @@ hub_gui::hub_gui(QWidget *parent)
     about_view = false;
 
     connect(&hub, &Hub::depotsUpdated, this, &hub_gui::on_depots_updated);
+    connect(&hub,&Hub::app_installed,this,&hub_gui::on_application_installed);
+    connect(&hub,&Hub::app_uninstall,this,&hub_gui::on_application_uninstalled);
+    connect(&hub,&Hub::app_update,this,&hub_gui::on_application_updated);
 
     ui->arrera_hub->setCurrentWidget(ui->load_page);
     ui->L_PAGE_LOAD->setText("Mise à jour des dépôts");
@@ -82,6 +85,10 @@ void hub_gui::on_depots_updated(bool succes){
     page_load = false;
     ui->SOFT_STACKED->setCurrentWidget(ui->install_soft);
 
+    ui->SOFT_STACKED->setCurrentWidget(ui->install_soft);
+    ui->BTN_SOFT_UPDATE->setText("Mise a jour");
+    ui->BTN_SOFT_UPDATE->setIcon(QIcon(":/gui/asset/icone/gui/update_soft.png"));
+    page_update = false;
 }
 
 void hub_gui::on_application_installed(bool succes)
@@ -100,9 +107,9 @@ void hub_gui::on_application_updated(bool succes)
 {
     ui->arrera_hub->setCurrentWidget(ui->main);
     if (succes){
-        QMessageBox::information(this,"Arrera Hub","Application désinstallée");
+        QMessageBox::information(this,"Arrera Hub","L'application a bien été mise à jour");
     }else {
-        QMessageBox::information(this,"Arrera Hub","L'application n'a pas pu être désinstallée");
+        QMessageBox::information(this,"Arrera Hub","L'application n'a pas pu être mise à jour");
     }
     page_load = false;
     on_BTN_UPDATE_DEPOS_clicked();
@@ -112,9 +119,9 @@ void hub_gui::on_application_uninstalled(bool succes)
 {
     ui->arrera_hub->setCurrentWidget(ui->main);
     if (succes){
-        QMessageBox::information(this,"Arrera Hub","L'application a bien été mise à jour");
+        QMessageBox::information(this,"Arrera Hub","Application désinstallée");
     }else {
-        QMessageBox::information(this,"Arrera Hub","L'application n'a pas pu être mise à jour");
+        QMessageBox::information(this,"Arrera Hub","L'application n'a pas pu être désinstallée");
     }
     page_load = false;
     on_BTN_UPDATE_DEPOS_clicked();
@@ -158,7 +165,7 @@ void hub_gui::on_uninstall_application(QString soft)
     page_load = true;
     ui->arrera_hub->setCurrentWidget(ui->load_page);
     ui->L_PAGE_LOAD->setText("Désinstallation de "+soft+" ...");
-    hub.install_software(soft);
+    hub.uninstall_software(soft);
 }
 
 void hub_gui::on_update_application(QString soft)
@@ -166,7 +173,7 @@ void hub_gui::on_update_application(QString soft)
     page_load = true;
     ui->arrera_hub->setCurrentWidget(ui->load_page);
     ui->L_PAGE_LOAD->setText("Mise à jour de "+soft+" ...");
-    hub.install_software(soft);
+    hub.update_software(soft);
 }
 
 void hub_gui::set_view_install_soft(QStringList list_available,QStringList list_installed){
@@ -210,13 +217,13 @@ void hub_gui::set_view_install_soft(QStringList list_available,QStringList list_
             btnAction->setText("Désinstaller");
             btnAction->setIcon(QIcon(":/gui/asset/icone/gui/uninstall.png"));
             connect(btnAction, &QPushButton::clicked, this, [this, soft]() {
-                cout << "Desistallation" << endl;
+                on_uninstall_application(soft);
             });
         }else{
             btnAction->setText("Installer");
             btnAction->setIcon(QIcon(":/gui/asset/icone/gui/install.png"));
             connect(btnAction, &QPushButton::clicked, this, [this, soft]() {
-                cout << "Installe" << endl;
+                on_install_application(soft);
             });
         }
         btnAction->setIconSize(QSize(16, 16));
@@ -312,7 +319,7 @@ void hub_gui::set_view_update_soft(QStringList list_to_update)
         btnAction->setIcon(QIcon(":/gui/asset/icone/gui/update_soft.png"));
 
         connect(btnAction, &QPushButton::clicked, this, [this, soft]() {
-            cout << "Lancement de la mise à jour pour : " << soft.toStdString() << endl;
+            on_update_application(soft);
         });
 
         frameLayout->addWidget(labelIcone);
