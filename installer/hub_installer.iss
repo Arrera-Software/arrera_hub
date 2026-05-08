@@ -4,14 +4,14 @@
 
 #define MyAppName "Arrera Hub"
 #define MyAppVersion "I2026-0.00"
-#define MyAppPublisher "Ton Nom ou Organisation"
+#define MyAppPublisher "Arrera Software"
 #define MyAppExeName "Arrera_Hub.exe"
 #define MyIconName "linux_win.ico"
 
 ; /!\ IMPORTANT : Remplace le chemin ci-dessous par le dossier de ton PC 
 ; où se trouvent tous les fichiers que tu m'as montrés (DLL, dossiers Qt, etc.)
 ; Garde bien le "\*" à la fin.
-#define MyAppSourcePath "C:\Chemin\Vers\Ton\Dossier\De\Compilation\*"
+#define MyAppSourcePath "C:\Users\arrera\Desktop\arrera-hub-windows-x86\*"
 
 [Setup]
 ; Identifiant unique de l'application (Généré par Inno Setup)
