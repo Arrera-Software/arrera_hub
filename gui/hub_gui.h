@@ -10,6 +10,10 @@
 #include "arrera_qt/roundedframe.h"
 #include "arrera_qt/apushbutton.h"
 
+#include "../update_demon/ctigerdemon.h"
+
+#define VERSION "dev"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class hub_gui;
@@ -23,6 +27,7 @@ class hub_gui : public QMainWindow
 public:
     hub_gui(QWidget *parent = nullptr);
     ~hub_gui();
+    void show();
 
 private slots:
     void on_BTN_ICONE_clicked();
@@ -49,10 +54,13 @@ private slots:
 
     void on_update_application(QString soft);
 
+    void on_BTN_CHECK_UPDATE_clicked();
+
 private: // Atribut
     Ui::hub_gui *ui;
     Hub hub;
     Arrera_Theme theme;
+    CTigerDemon update_demon;
     bool about_view,page_load,page_update,is_online;
 private : // Methode private
     void set_view_install_soft(QStringList list_available,QStringList list_installed);

@@ -5,7 +5,8 @@ hub_gui::hub_gui(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::hub_gui),
     hub("https://raw.githubusercontent.com/Arrera-Software/distribution/refs/heads/main/index.json",this),
-    theme(this)
+    theme(this),
+    update_demon("hub",VERSION,this)
 {
     ui->setupUi(this);
     theme.loadThemeFromJson(":/theme/asset/theme/theme_default.json");
@@ -32,6 +33,35 @@ hub_gui::hub_gui(QWidget *parent)
 
     ui->BTN_SOFT_UPDATE->setText("Mise a jour");
     ui->BTN_SOFT_UPDATE->setIcon(QIcon(":/gui/asset/icone/gui/update_soft.png"));
+
+    connect(&update_demon, &CTigerDemon::updateResult, this, [=](bool hasUpdate, QString newVersion){
+        if (hasUpdate) {
+            ui->L_SATE_UPDATE->setVisible(true);
+            ui->L_SATE_UPDATE->setText("La version " +newVersion+ " est disponible");
+            QMessageBox::information(
+                this,"Arrera Hub",
+                "Une mise à jour d'Arrera Hub est disponible. Rendez-vous sur le site Arrera Software");
+        }else {
+            ui->L_SATE_UPDATE->setVisible(false);
+        }
+    });
+
+    connect(&update_demon, &CTigerDemon::updateError, this, [=](int errorCode){
+        if (errorCode == -1){
+            ui->L_SATE_UPDATE->setVisible(true);
+            ui->L_SATE_UPDATE->setText("Impossible de vérifier les mises à jour, une erreur réseau s'est produite");
+        }else if (errorCode == -2){
+            ui->L_SATE_UPDATE->setVisible(true);
+            ui->L_SATE_UPDATE->setText("Impossible de vérifier les mises à jour");
+        }else{
+            ui->L_SATE_UPDATE->setVisible(false);
+        }
+    });
+}
+
+void hub_gui::show(){
+    QMainWindow::show();
+    on_BTN_CHECK_UPDATE_clicked();
 }
 
 hub_gui::~hub_gui()
@@ -366,4 +396,10 @@ void hub_gui::set_view_update_soft(QStringList list_to_update)
     }
 
     layoutPrincipal->addStretch();
+}
+
+void hub_gui::on_BTN_CHECK_UPDATE_clicked()
+{
+    update_demon.checkUpdate();
+    ui->L_APP_VERSION->setText(update_demon.get_version());
 }

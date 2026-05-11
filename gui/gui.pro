@@ -13,6 +13,7 @@ CONFIG += c++17
 
 SOURCES += \
     ../core/hub.cpp \
+    ../update_demon/ctigerdemon.cpp \
     arrera_qt/apushbutton.cpp \
     arrera_qt/arrera_theme.cpp \
     arrera_qt/roundedframe.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
 
 HEADERS += \
     ../core/hub.h \
+    ../update_demon/ctigerdemon.h \
     arrera_qt/apushbutton.h \
     arrera_qt/arrera_theme.h \
     arrera_qt/roundedframe.h \
