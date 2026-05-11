@@ -219,7 +219,7 @@ QStringList Hub::get_soft_available()
 
                     if (appObj.contains("name")) {
                         QString nom = appObj["name"].toString();
-                        liste_noms.append(nom);
+                        if (nom != "hub") liste_noms.append(nom);
                     }
                 }
             }
