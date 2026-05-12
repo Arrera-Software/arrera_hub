@@ -11,6 +11,7 @@
 #include "arrera_qt/apushbutton.h"
 
 #include "../update_demon/ctigerdemon.h"
+#include "socket/csocketclient.h"
 
 #define VERSION "dev"
 
@@ -61,6 +62,7 @@ private: // Atribut
     Hub hub;
     Arrera_Theme theme;
     CTigerDemon update_demon;
+    CArreraClient connection_arrera;
     bool about_view,page_load,page_update,is_online;
 private : // Methode private
     void set_view_install_soft(QStringList list_available,QStringList list_installed);
