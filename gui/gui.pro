@@ -1,5 +1,5 @@
 TEMPLATE = app
-QT       += core gui network
+QT       += core gui websockets network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,7 +18,8 @@ SOURCES += \
     arrera_qt/arrera_theme.cpp \
     arrera_qt/roundedframe.cpp \
     main.cpp \
-    hub_gui.cpp
+    hub_gui.cpp \
+    socket/csocketclient.cpp
 
 HEADERS += \
     ../core/hub.h \
@@ -26,7 +27,8 @@ HEADERS += \
     arrera_qt/apushbutton.h \
     arrera_qt/arrera_theme.h \
     arrera_qt/roundedframe.h \
-    hub_gui.h
+    hub_gui.h \
+    socket/csocketclient.h
 
 FORMS += \
     hub_gui.ui
