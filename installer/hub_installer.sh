@@ -3,7 +3,7 @@
 # ==========================================
 # VARIABLES À MODIFIER
 # ==========================================
-ZIP_URL="https://github.com/Arrera-Software/arrera_hub/releases/download/I2026-0.00/arrera-hub-linux-x86.zip" 
+ZIP_URL="https://github.com/Arrera-Software/arrera_hub/releases/download/I2026-1.00/arrera-hub-linux-x86.zip" 
 APP_NAME="arrera_hub"                              
 EXECUTABLE_NAME="Arrera_Hub"                      
 ICON_NAME="icon.png"                               
