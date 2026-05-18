@@ -3,7 +3,7 @@
 ; ==========================================================
 
 #define MyAppName "Arrera Hub"
-#define MyAppVersion "I2026-0.00"
+#define MyAppVersion "I2026-1.00"
 #define MyAppPublisher "Arrera Software"
 #define MyAppExeName "Arrera_Hub.exe"
 #define MyIconName "linux_win.ico"
