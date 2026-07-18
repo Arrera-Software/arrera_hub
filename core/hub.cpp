@@ -381,6 +381,7 @@ void Hub::perform_installation(const QString& soft, std::function<void(bool)> ca
 
         QString url_download = dict.value("download_linux").toString();
         QString version = get_data_from_depots(soft,"version");
+        QString app_id = get_data_from_depots(soft,"app_id");
         if (url_download.isEmpty() || version.isEmpty()) {
             if (callback) callback(false);
             return;
@@ -403,7 +404,7 @@ void Hub::perform_installation(const QString& soft, std::function<void(bool)> ca
 
         QNetworkReply *reply = dlManager->get(request);
 
-        connect(reply, &QNetworkReply::finished, [this, reply, dlManager, zipPath, appInstallDir, soft, folderName, version, callback]() {
+        connect(reply, &QNetworkReply::finished, [this, reply, dlManager, zipPath, appInstallDir, soft, folderName, version,app_id, callback]() {
             if (reply->error() == QNetworkReply::NoError) {
                 QString iconPath = "system-run";
                 QFile file(zipPath);
@@ -490,13 +491,24 @@ void Hub::perform_installation(const QString& soft, std::function<void(bool)> ca
                     QFile dFile(desktopPath);
                     if (dFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
                         QTextStream out(&dFile);
+                        if (!app_id.isEmpty()){
                         out << "[Desktop Entry]\n"
                             << "Name=" << soft << "\n"
                             << "Exec=" << shPath << "\n"
                             << "Path=" << appInstallDir << "\n"
                             << "Icon=" << iconPath << "\n"
                             << "Type=Application\n"
-                            << "Terminal=false\n";
+                            << "Terminal=false\n"
+                            << "StartupWMClass="<< app_id << "\n";
+                        }else {
+                            out << "[Desktop Entry]\n"
+                                << "Name=" << soft << "\n"
+                                << "Exec=" << shPath << "\n"
+                                << "Path=" << appInstallDir << "\n"
+                                << "Icon=" << iconPath << "\n"
+                                << "Type=Application\n"
+                                << "Terminal=false\n";
+                        }
                         dFile.close();
 
                         dFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
