@@ -13,7 +13,7 @@
 #include "../update_demon/ctigerdemon.h"
 #include "socket/csocketclient.h"
 
-#define VERSION "dev"
+#define VERSION "I2026-1.50"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
