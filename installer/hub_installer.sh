@@ -3,10 +3,10 @@
 # ==========================================
 # VARIABLES À MODIFIER
 # ==========================================
-ZIP_URL="https://github.com/Arrera-Software/arrera_hub/releases/download/I2026-0.00/arrera-hub-linux-x86.zip" 
+ZIP_URL="https://github.com/Arrera-Software/arrera_hub/releases/download/I2026-1.50/arrera-hub-linux-x86.zip" 
 APP_NAME="arrera_hub"                              
 EXECUTABLE_NAME="Arrera_Hub"                      
-ICON_NAME="icon.png"                               
+ICON_NAME="linux_win.png"                               
 # ==========================================
 
 DOWNLOADED_ZIP="/tmp/arrera-hub-linux-x86.zip"
@@ -57,7 +57,8 @@ Exec="$LAUNCH_SCRIPT"
 Icon=$TARGET_DIR/$FOLDER_NAME/$ICON_NAME
 Terminal=false
 Type=Application
-Categories=Utility;
+Categories=Utility
+StartupWMClass=Arrera_Hub;
 EOF
 
 update-desktop-database "$DESKTOP_DIR" 2>/dev/null
